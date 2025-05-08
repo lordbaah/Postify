@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   signUp,
   signIn,
-  verifyOtp,
+  verifyEmail,
   signOut,
   forgotPassword,
   resetPassword,
@@ -16,7 +16,7 @@ const authRouter = Router();
 // Define routes
 authRouter.post('/sign-up', signUp);
 authRouter.post('/sign-in', signIn);
-authRouter.post('/verify-otp', verifyOtp);
+authRouter.post('/verify-email', verifyEmail);
 authRouter.post('/sign-out', signOut);
 authRouter.post('/forgot-password', forgotPassword);
 authRouter.post('/reset-password', resetPassword);

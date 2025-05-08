@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import sendEmail from '../utils/sendEmail.js';
 import { generateOTP } from '../utils/generateOTP.js';
+import { renderTemplate } from '../views/renderTemplate.js';
 
 //bug to fix => user token already existing should be removed when a user change password or users should be logged out after changing password
 
@@ -56,10 +57,13 @@ export const signUp = async (req, res, next) => {
     );
 
     // Send OTP via email
+    const html = renderTemplate('verifyAccount', { OTP: otp });
+
     await sendEmail({
       to: newUser[0].email,
       subject: 'Verify your Postify account',
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+      // html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+      html,
     });
 
     // Commit the transaction
@@ -137,7 +141,7 @@ export const signIn = async (req, res, next) => {
   }
 };
 
-export const verifyOtp = async (req, res, next) => {
+export const verifyEmail = async (req, res, next) => {
   const { email, otp } = req.body;
 
   try {
@@ -172,6 +176,16 @@ export const verifyOtp = async (req, res, next) => {
     user.otpExpiry = undefined;
     await user.save();
 
+    //send email
+    const html = renderTemplate('welcome', {
+      FIRST_NAME: user.firstName,
+    });
+    await sendEmail({
+      to: user.email,
+      subject: 'Welcome to Postify!',
+      html,
+    });
+
     res
       .status(201)
       .json({ success: true, message: 'Account verified successfully' });
@@ -201,10 +215,12 @@ export const forgotPassword = async (req, res, next) => {
     await user.save();
 
     // Send OTP via email
+    const html = renderTemplate('resetPassword', { OTP: otp });
     await sendEmail({
       to: user.email,
       subject: 'Reset your password',
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes. ignore this message if you didn't request for OTP code, Don't share with anyone</p>`,
+      // html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes. ignore this message if you didn't request for OTP code, Don't share with anyone</p>`,
+      html,
     });
 
     res.status(201).json({ success: true, message: 'OTP sent to email' });
@@ -237,6 +253,16 @@ export const resetPassword = async (req, res, next) => {
     user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
+
+    //send message
+    const html = renderTemplate('passwordChangeConfrimation', {
+      FIRST_NAME: user.firstName,
+    });
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Updated!',
+      html,
+    });
 
     res
       .status(200)

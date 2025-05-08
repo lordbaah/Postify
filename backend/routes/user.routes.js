@@ -6,9 +6,9 @@ import authorizeRoles from '../middlewares/authorize.middle.js';
 const userRouter = Router();
 
 //get all users admin route
-userRouter.get('/', getUsers);
+userRouter.get('/', verifyToken, authorizeRoles('admin'), getUsers);
 
-//single user
+//single user profile
 userRouter.get('/profile/:id', verifyToken, getUser);
 
 userRouter.post('/', (req, res) => {
@@ -23,23 +23,18 @@ userRouter.delete('/:id', (req, res) => {
   res.send({ title: 'delete user details' });
 });
 
-userRouter.get(
-  '/admin-only',
-  verifyToken,
-  authorizeRoles('admin'),
-  (req, res) => {
-    res.send({ message: 'Welcome Admin!' });
-  }
-);
+userRouter.get('/admin', verifyToken, authorizeRoles('admin'), (req, res) => {
+  res.send({ message: 'Welcome Admin!' });
+});
 
-userRouter.get(
-  '/user-or-admin',
-  verifyToken,
-  authorizeRoles('user', 'admin'),
-  (req, res) => {
-    res.send({ message: 'Welcome User or Admin!' });
-  }
-);
+// userRouter.get(
+//   '/user-or-admin',
+//   verifyToken,
+//   authorizeRoles('user', 'admin'),
+//   (req, res) => {
+//     res.send({ message: 'Welcome User or Admin!' });
+//   }
+// );
 
 export default userRouter;
 
