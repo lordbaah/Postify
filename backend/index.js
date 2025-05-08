@@ -3,6 +3,7 @@ import ENV from './config/env.js';
 import connectDB from './database/mongodb.js';
 import errorHandler from './middlewares/error.middleware.js';
 // import { ratelimiter } from './middlewares/rateLimiter.middleware.js';
+import cors from 'cors';
 
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
