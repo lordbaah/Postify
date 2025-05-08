@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getUsers, getUser } from '../controllers/user.controller.js';
 import verifyToken from '../middlewares/auth.middleware.js';
+import authorizeRoles from '../middlewares/authorize.middle.js';
 
 const userRouter = Router();
 
@@ -21,6 +22,24 @@ userRouter.put('/:id', (req, res) => {
 userRouter.delete('/:id', (req, res) => {
   res.send({ title: 'delete user details' });
 });
+
+userRouter.get(
+  '/admin-only',
+  verifyToken,
+  authorizeRoles('admin'),
+  (req, res) => {
+    res.send({ message: 'Welcome Admin!' });
+  }
+);
+
+userRouter.get(
+  '/user-or-admin',
+  verifyToken,
+  authorizeRoles('user', 'admin'),
+  (req, res) => {
+    res.send({ message: 'Welcome User or Admin!' });
+  }
+);
 
 export default userRouter;
 
