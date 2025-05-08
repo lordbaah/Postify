@@ -322,6 +322,16 @@ export const changePassword = async (req, res, next) => {
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
+    //send message
+    const html = renderTemplate('passwordChangeConfrimation', {
+      FIRST_NAME: user.firstName,
+    });
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Updated!',
+      html,
+    });
+
     res
       .status(200)
       .json({ success: true, message: 'Password changed successfully' });
