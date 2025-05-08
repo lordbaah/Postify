@@ -25,13 +25,8 @@ userRouter.put('/:id', (req, res) => {
 });
 
 //delete user admin
-userRouter.delete(
-  '/delete/:id',
-  verifyToken,
-  authorizeRoles('admin'),
-  (req, res) => {
-    res.send({ title: 'delete user details' });
-  }
-);
+userRouter.delete('/:id', verifyToken, authorizeRoles('admin'), (req, res) => {
+  res.send({ title: 'delete user details' });
+});
 
 export default userRouter;
