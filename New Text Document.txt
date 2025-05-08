@@ -1,0 +1,18 @@
+{
+  "id": 123,
+  "title": "What is REST",
+  "content": "REST is an architectural style for building web services...",
+  "published_at": "2023-11-04T14:30:00Z",
+  "author": {
+    "id": 456,
+    "name": "John Doe",
+    "profile_url": "https://example.com/authors/456"
+  },
+  "comments": {
+    "count": 5,
+    "comments_url": "https://example.com/posts/123/comments"
+  },
+  "self": {
+    "link": "https://example.com/posts/123"
+  }
+}

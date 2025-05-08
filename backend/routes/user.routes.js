@@ -11,6 +11,11 @@ userRouter.get('/', verifyToken, authorizeRoles('admin'), getUsers);
 //single user profile
 userRouter.get('/profile/:id', verifyToken, getUser);
 
+//admin accessing dashboard
+userRouter.get('/admin', verifyToken, authorizeRoles('admin'), (req, res) => {
+  res.send({ message: 'Welcome Admin!' });
+});
+
 userRouter.post('/', (req, res) => {
   res.send({ title: 'create new user' });
 });
@@ -19,37 +24,14 @@ userRouter.put('/:id', (req, res) => {
   res.send({ title: 'update user details' });
 });
 
-userRouter.delete('/:id', (req, res) => {
-  res.send({ title: 'delete user details' });
-});
-
-userRouter.get('/admin', verifyToken, authorizeRoles('admin'), (req, res) => {
-  res.send({ message: 'Welcome Admin!' });
-});
-
-// userRouter.get(
-//   '/user-or-admin',
-//   verifyToken,
-//   authorizeRoles('user', 'admin'),
-//   (req, res) => {
-//     res.send({ message: 'Welcome User or Admin!' });
-//   }
-// );
+//delete users
+userRouter.delete(
+  '/delete/:id',
+  verifyToken,
+  authorizeRoles('admin'),
+  (req, res) => {
+    res.send({ title: 'delete user details' });
+  }
+);
 
 export default userRouter;
-
-/**
- * Route accessible only to admin users
- */
-// router.get('/admin-only', authorizeRoles('admin'), (req, res) => {
-//   res.send('Welcome Admin!');
-// });
-
-/**
- * Route accessible to both user and admin roles
- */
-// router.get('/user-or-admin', authorizeRoles('user', 'admin'), (req, res) => {
-//   res.send('Welcome User or Admin!');
-// });
-
-// module.exports = router;
