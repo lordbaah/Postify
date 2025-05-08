@@ -24,7 +24,7 @@ userRouter.put('/:id', (req, res) => {
   res.send({ title: 'update user details' });
 });
 
-//delete users
+//delete user admin
 userRouter.delete(
   '/delete/:id',
   verifyToken,
