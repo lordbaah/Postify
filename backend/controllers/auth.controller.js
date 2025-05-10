@@ -1,13 +1,12 @@
 import mongoose from 'mongoose';
 import User from '../models/user.model.js';
-import ENV from '../config/env.js';
+// import ENV from '../config/env.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import sendEmail from '../utils/sendEmail.js';
 import { generateOTP } from '../utils/generateOTP.js';
+import { generateToken } from '../utils/generateToken.js';
 import { renderTemplate } from '../views/renderTemplate.js';
-
-//bug to fix => user token already existing should be removed when a user change password or users should be logged out after changing password
 
 export const signUp = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -24,14 +23,17 @@ export const signUp = async (req, res, next) => {
     }
 
     // Check if the user already exists
-    const findExistingUser = await User.findOne({
-      $or: [{ email }, { userName }],
-    }).session(session);
+    const findExistingEmail = await User.findOne({ email }).session(session);
+    const findExistingUserName = await User.findOne({ userName }).session(
+      session
+    );
 
-    if (findExistingUser) {
+    if (findExistingEmail || findExistingUserName) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(400)
-        .json({ success: false, message: 'User already exists' });
+        .json({ success: false, message: 'Email or Username already exists' });
     }
 
     // Hash the password before saving
@@ -40,7 +42,7 @@ export const signUp = async (req, res, next) => {
 
     const otp = generateOTP();
 
-    // Create new user with OTP
+    // Create new user with OTP and initial tokenVersion
     const newUser = await User.create(
       [
         {
@@ -51,6 +53,7 @@ export const signUp = async (req, res, next) => {
           password: hashedPassword,
           otp,
           otpExpiry: Date.now() + 10 * 60 * 1000, // OTP expiry 10 minutes
+          tokenVersion: 1, // Initialize token version
         },
       ],
       { session }
@@ -62,7 +65,6 @@ export const signUp = async (req, res, next) => {
     await sendEmail({
       to: newUser[0].email,
       subject: 'Verify your Postify account',
-      // html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
       html,
     });
 
@@ -70,17 +72,25 @@ export const signUp = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: newUser[0]._id }, ENV.JWT_SECRET, {
-      expiresIn: ENV.JWT_EXPIRES_IN,
-    });
+    // Generate JWT token with version information
+    const token = generateToken(newUser[0]._id, newUser[0].tokenVersion);
 
     // Return success response and token
     res.status(201).json({
       success: true,
       message: 'User registered successfully. Please verify your email.',
-      // token,
-      data: { token, user: newUser[0] },
+      data: {
+        token,
+        user: {
+          _id: newUser[0]._id,
+          firstName: newUser[0].firstName,
+          lastName: newUser[0].lastName,
+          userName: newUser[0].userName,
+          email: newUser[0].email,
+          isVerified: newUser[0].isVerified,
+          role: newUser[0].role,
+        },
+      },
     });
   } catch (error) {
     await session.abortTransaction();
@@ -105,7 +115,7 @@ export const signIn = async (req, res, next) => {
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: 'User not found' });
+        .json({ success: false, message: 'Invalid credentials' });
     }
 
     // Compare passwords
@@ -116,25 +126,32 @@ export const signIn = async (req, res, next) => {
         .json({ success: false, message: 'Invalid credentials' });
     }
 
-    //check if verified
+    // Check if verified
     if (!user.isVerified) {
       return res
         .status(401)
         .json({ success: false, message: 'Please verify your account' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, ENV.JWT_SECRET, {
-      expiresIn: ENV.JWT_EXPIRES_IN,
-    });
+    // Generate JWT token with version
+    const token = generateToken(user._id, user.tokenVersion);
 
-    //return success and token
-    res.status(201).json({
+    // Return success and token
+    res.status(200).json({
       success: true,
-      message: 'Sign In successfully',
-      // token,
-      // user: { id: user._id, username: user.userName, role: user.role },
-      data: { token, user },
+      message: 'Sign in successful',
+      data: {
+        token,
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          userName: user.userName,
+          email: user.email,
+          isVerified: user.isVerified,
+          role: user.role,
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -176,7 +193,7 @@ export const verifyEmail = async (req, res, next) => {
     user.otpExpiry = undefined;
     await user.save();
 
-    //send email
+    // Send welcome email
     const html = renderTemplate('welcome', {
       FIRST_NAME: user.firstName,
     });
@@ -187,8 +204,61 @@ export const verifyEmail = async (req, res, next) => {
     });
 
     res
-      .status(201)
+      .status(200)
       .json({ success: true, message: 'Account verified successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendVerificationOTP = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res
+        .status(422)
+        .json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Return the same message whether the user exists or not for security
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message:
+          'If your email is registered and not verified, a new OTP has been sent',
+      });
+    }
+
+    // If user is already verified, no need to send OTP
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'This account is already verified. Please sign in',
+      });
+    }
+
+    // Generate and save new OTP
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+    await user.save();
+
+    // Send OTP via email
+    const html = renderTemplate('verifyAccount', { OTP: otp });
+    await sendEmail({
+      to: user.email,
+      subject: 'Verify your Postify account',
+      html,
+    });
+
+    res.status(200).json({
+      success: true,
+      message:
+        'If your email is registered and not verified, a new OTP has been sent',
+    });
   } catch (error) {
     next(error);
   }
@@ -200,18 +270,22 @@ export const forgotPassword = async (req, res, next) => {
     if (!email) {
       return res
         .status(422)
-        .json({ success: false, message: 'email field must be filled' });
+        .json({ success: false, message: 'Email field must be filled' });
     }
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found' });
+
+    // Don't reveal if user exists or not for security
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'If your email is registered, you will receive an OTP shortly',
+      });
+    }
 
     const otp = generateOTP();
     user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000; //OTP expiry 10 minutes
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // OTP expiry 10 minutes
     await user.save();
 
     // Send OTP via email
@@ -219,11 +293,13 @@ export const forgotPassword = async (req, res, next) => {
     await sendEmail({
       to: user.email,
       subject: 'Reset your password',
-      // html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes. ignore this message if you didn't request for OTP code, Don't share with anyone</p>`,
       html,
     });
 
-    res.status(201).json({ success: true, message: 'OTP sent to email' });
+    res.status(200).json({
+      success: true,
+      message: 'If your email is registered, you will receive an OTP shortly',
+    });
   } catch (error) {
     next(error);
   }
@@ -252,9 +328,13 @@ export const resetPassword = async (req, res, next) => {
     user.password = await bcrypt.hash(newPassword, salt);
     user.otp = undefined;
     user.otpExpiry = undefined;
+
+    // Increment token version to invalidate existing tokens - THIS FIXES THE BUG
+    user.tokenVersion = (user.tokenVersion || 1) + 1;
+
     await user.save();
 
-    //send message
+    // Send confirmation email
     const html = renderTemplate('passwordChangeConfrimation', {
       FIRST_NAME: user.firstName,
     });
@@ -264,40 +344,60 @@ export const resetPassword = async (req, res, next) => {
       html,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: 'Password reset successful' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateProfile = async (req, res, next) => {
-  const { id } = req.user; // from auth middleware
-  const { firstName, lastName, userName } = req.body;
-
-  try {
-    if (!firstName || !lastName || !userName) {
-      return res
-        .status(422)
-        .json({ success: false, message: 'All fields must be filled' });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      id,
-      { firstName, lastName, userName },
-      { new: true }
-    );
-    // res.json(user);
     res.status(200).json({
       success: true,
-      message: 'Profile updated successfully',
-      data: { user },
+      message:
+        'Password reset successful. Please sign in with your new password.',
     });
   } catch (error) {
     next(error);
   }
 };
+
+// export const updateProfile = async (req, res, next) => {
+//   const { id } = req.user; // from auth middleware
+//   const { firstName, lastName, userName } = req.body;
+
+//   try {
+//     if (!firstName || !lastName || !userName) {
+//       return res
+//         .status(422)
+//         .json({ success: false, message: 'All fields must be filled' });
+//     }
+
+//     // Check if username is already taken by another user
+//     const existingUser = await User.findOne({
+//       userName,
+//       _id: { $ne: id },
+//     });
+
+//     if (existingUser) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: 'Username is already taken' });
+//     }
+
+//     const user = await User.findByIdAndUpdate(
+//       id,
+//       { firstName, lastName, userName },
+//       { new: true }
+//     ).select('-password -otp -otpExpiry');
+
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: 'User not found' });
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Profile updated successfully',
+//       data: { user },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const changePassword = async (req, res, next) => {
   const { id } = req.user;
@@ -311,18 +411,37 @@ export const changePassword = async (req, res, next) => {
     }
 
     const user = await User.findById(id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
+    }
 
     const valid = await bcrypt.compare(currentPassword, user.password);
-    if (!valid)
+    if (!valid) {
       return res
         .status(401)
         .json({ success: false, message: 'Incorrect current password' });
+    }
+
+    // Ensure new password is different from the current one
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from the current password',
+      });
+    }
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
+
+    // Increment token version to invalidate existing tokens - THIS FIXES THE BUG
+    user.tokenVersion = (user.tokenVersion || 1) + 1;
+
     await user.save();
 
-    //send message
+    // Send confirmation email
     const html = renderTemplate('passwordChangeConfrimation', {
       FIRST_NAME: user.firstName,
     });
@@ -332,9 +451,11 @@ export const changePassword = async (req, res, next) => {
       html,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: 'Password changed successfully' });
+    res.status(200).json({
+      success: true,
+      message:
+        'Password changed successfully. Please sign in again with your new password.',
+    });
   } catch (error) {
     next(error);
   }
@@ -346,9 +467,13 @@ export const signOut = async (req, res, next) => {
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
     });
 
-    res.json({ message: 'Successfully logged out' });
+    res.status(200).json({
+      success: true,
+      message: 'Successfully logged out',
+    });
   } catch (error) {
     next(error);
   }

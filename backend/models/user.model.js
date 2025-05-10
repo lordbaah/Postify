@@ -38,12 +38,17 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minLength: 6,
+      minLength: 8,
     },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     isVerified: { type: Boolean, default: false },
     otp: String,
     otpExpiry: Date,
+    // Add tokenVersion field to track password changes and force token invalidation
+    tokenVersion: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true }
 );

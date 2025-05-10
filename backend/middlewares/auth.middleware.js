@@ -17,6 +17,7 @@ const verifyToken = async (req, res, next) => {
     // If no token is found
     if (!token) {
       return res.status(401).json({
+        success: false,
         message: 'Unauthorized: No token provided or Log In to have access',
       });
     }
@@ -25,20 +26,41 @@ const verifyToken = async (req, res, next) => {
     const decodedToken = jwt.verify(token, ENV.JWT_SECRET);
 
     // Find user from token
-    // const user = await User.findById(decodedToken.userId).select('-password');
     const user = await User.findById(decodedToken.userId);
 
     if (!user) {
-      return res.status(401).json({ message: 'Unauthorized: User not found' });
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized: User not found',
+      });
     }
 
-    // Attach user to request
-    req.user = user;
+    // Check if token version matches current user's token version
+    // This is the key part that fixes the security issue with password changes
+    if (decodedToken.tokenVersion !== user.tokenVersion) {
+      return res.status(401).json({
+        success: false,
+        message:
+          'Your session has expired due to security changes. Please sign in again.',
+      });
+    }
+
+    // Attach user to request (only include necessary properties)
+    req.user = {
+      id: user._id,
+      role: user.role,
+      email: user.email,
+      isVerified: user.isVerified,
+      userName: user.userName,
+    };
+
     next();
   } catch (error) {
-    return res
-      .status(401)
-      .json({ message: 'Unauthorized: Invalid token', error: error.message });
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized: Invalid token',
+      error: error.message,
+    });
   }
 };
 

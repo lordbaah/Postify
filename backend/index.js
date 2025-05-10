@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 
-app.get('/', (req, res) => {
+app.get('/api/v1', (req, res) => {
   res.send('blog api is running');
 });
 
