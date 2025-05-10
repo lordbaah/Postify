@@ -15,11 +15,17 @@ export const getUsers = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
+    // console.log('Requested User ID:', typeof req.params.id);
+    // console.log('Token User ID:', typeof req.user.id);
+
     const requestedUserId = req.params.id;
     const currentUserId = req.user.id; // From auth middleware
 
     // Check if user is accessing their own profile or is an admin
-    if (requestedUserId !== currentUserId && req.user.role !== 'admin') {
+    if (
+      String(requestedUserId) !== String(currentUserId) &&
+      req.user.role !== 'admin'
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only view your own profile.',
@@ -53,7 +59,10 @@ export const updateProfile = async (req, res, next) => {
     const currentUserRole = req.user.role;
 
     // Check if user is updating their own profile or is an admin
-    if (requestedUserId !== currentUserId && currentUserRole !== 'admin') {
+    if (
+      String(requestedUserId) !== String(currentUserId) &&
+      currentUserRole !== 'admin'
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only update your own profile.',
@@ -124,7 +133,7 @@ export const updateUserRole = async (req, res, next) => {
     }
 
     // Prevent admin from changing their own role
-    if (userId === req.user.id) {
+    if (String(userId) === String(req.user.id)) {
       return res.status(400).json({
         success: false,
         message: 'You cannot change your own role',
