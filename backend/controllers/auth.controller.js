@@ -463,7 +463,14 @@ export const changePassword = async (req, res, next) => {
 
 export const signOut = async (req, res, next) => {
   try {
-    // Optional: If you're using JWT in cookies, clear the cookie
+    const userId = req.user.id;
+
+    // Invalidate the token by incrementing the tokenVersion
+    await User.findByIdAndUpdate(userId, {
+      $inc: { tokenVersion: 1 },
+    });
+
+    // Clear the cookie if you're using cookies
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

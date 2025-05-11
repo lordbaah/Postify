@@ -42,8 +42,7 @@ const verifyToken = async (req, res, next) => {
     if (decodedToken.tokenVersion !== user.tokenVersion) {
       return res.status(401).json({
         success: false,
-        message:
-          'Your session has expired due to security changes. Please sign in again.',
+        message: 'Your session has expired. Please sign in again.',
       });
     }
 
