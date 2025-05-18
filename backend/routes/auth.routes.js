@@ -8,6 +8,7 @@ import {
   forgotPassword,
   resetPassword,
   changePassword,
+  checkAuth, // Added checkAuth import
 } from '../controllers/auth.controller.js';
 import verifyToken from '../middlewares/auth.middleware.js';
 
@@ -26,5 +27,8 @@ authRouter.post('/resend-verification', resendVerificationOTP);
 // Protected routes (need to be logged in with valid token)
 authRouter.put('/change-password', verifyToken, changePassword);
 authRouter.post('/signout', verifyToken, signOut);
+
+// Add new route for checking authentication status
+authRouter.get('/check-auth', verifyToken, checkAuth);
 
 export default authRouter;

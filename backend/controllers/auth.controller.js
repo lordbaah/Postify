@@ -52,7 +52,8 @@ export const signUp = async (req, res, next) => {
           email,
           password: hashedPassword,
           otp,
-          otpExpiry: Date.now() + 10 * 60 * 1000, // OTP expiry 10 minutes
+          // otpExpiry: Date.now() + 10 * 60 * 1000, // OTP expiry 10 minutes
+          otpExpiry: Date.now() + 30 * 60 * 1000, // OTP expiry 30 minutes
           tokenVersion: 1, // Initialize token version
         },
       ],
@@ -159,33 +160,23 @@ export const signIn = async (req, res, next) => {
 };
 
 export const verifyEmail = async (req, res, next) => {
-  // const { email, otp } = req.body;
-  const { otp } = req.body;
+  const { email, otp } = req.body; // Only require email and OTP
 
   try {
-    if (!otp) {
+    if (!email || !otp) {
       return res
         .status(422)
-        .json({ success: false, message: 'OTP must be provided' });
+        .json({ success: false, message: 'Email and OTP are required' });
     }
 
-    //this finds user by OTP and email
-    // const user = await User.findOne({
-    //   email,
-    //   otp,
-    //   otpExpiry: { $gt: Date.now() },
-    // });
-
-    // Find user by OTP and ensure it's not expired
-    const user = await User.findOne({
-      otp,
-      otpExpiry: { $gt: Date.now() }, // Ensure OTP is not expired
-    });
+    // Find user by email
+    const user = await User.findOne({ email });
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'User not found Check the email entered',
+      });
     }
 
     if (user.isVerified) {
@@ -319,29 +310,18 @@ export const forgotPassword = async (req, res, next) => {
 };
 
 export const resetPassword = async (req, res, next) => {
-  // const { email, otp, newPassword } = req.body;
-  const { otp, newPassword } = req.body;
+  const { email, otp, newPassword } = req.body; // Only require email and OTP
 
   try {
-    if (!otp || !newPassword) {
-      return res
-        .status(422)
-        .json({ success: false, message: 'OTP and new password are required' });
+    if (!email || !otp || !newPassword) {
+      return res.status(422).json({
+        success: false,
+        message: 'Email, OTP, and new password are required',
+      });
     }
 
-    // const user = await User.findOne({ email });
-    //this finds user by OTP and email
-    // const user = await User.findOne({
-    //   email,
-    //   otp,
-    //   otpExpiry: { $gt: Date.now() },
-    // });
-
-    // Find user by OTP and ensure it's not expired
-    const user = await User.findOne({
-      otp,
-      otpExpiry: { $gt: Date.now() }, // Ensure OTP is not expired
-    });
+    // Find user by email
+    const user = await User.findOne({ email });
 
     if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
       return res
@@ -354,6 +334,7 @@ export const resetPassword = async (req, res, next) => {
     user.password = await bcrypt.hash(newPassword, salt);
     user.otp = undefined;
     user.otpExpiry = undefined;
+    user.resetToken = undefined; // Still clear the token after use
 
     // Increment token version to invalidate existing tokens
     user.tokenVersion = (user.tokenVersion || 1) + 1;
@@ -364,7 +345,6 @@ export const resetPassword = async (req, res, next) => {
     const html = renderTemplate('passwordChangeConfrimation', {
       FIRST_NAME: user.firstName,
     });
-
     await sendEmail({
       to: user.email,
       subject: 'Password Updated!',
@@ -462,6 +442,38 @@ export const signOut = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Successfully logged out',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkAuth = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Format response to match what the client expects
+    res.status(200).json({
+      success: true,
+      message: 'Authentication successful',
+      data: {
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          userName: user.userName,
+          email: user.email,
+          isVerified: user.isVerified,
+          role: user.role,
+        },
+      },
     });
   } catch (error) {
     next(error);
