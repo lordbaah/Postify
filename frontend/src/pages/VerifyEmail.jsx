@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,17 +22,32 @@ import { useAuthStore } from '@/store/authStore';
 
 const VerifyEmail = () => {
   const [resendTimer, setResendTimer] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Get email from navigation state or auth store
+  const emailFromState = location.state?.email;
+
+  console.log(location);
 
   const { verifyaccount, resendSignUpOTp, isLoading, success, error } =
     useAuthStore();
 
   const form = useForm({
     defaultValues: {
-      email: '',
+      email: emailFromState || '', // Auto-populate with passed email
       otp: '',
     },
   });
 
+  // Set email in form when component mounts or email changes
+  useEffect(() => {
+    if (emailFromState) {
+      form.setValue('email', emailFromState);
+    }
+  }, [emailFromState, form]);
+
+  // Handle resend timer
   useEffect(() => {
     let interval;
     if (resendTimer > 0) {
@@ -42,11 +58,25 @@ const VerifyEmail = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  // Optional: Redirect if no email is provided
+  useEffect(() => {
+    if (!emailFromState) {
+      // Uncomment this if you want to redirect users without email back to signup
+      // navigate('/signup');
+    }
+  }, [emailFromState, navigate]);
+
   const handleEmailVerification = async (data) => {
     try {
       await verifyaccount(data);
 
-      form.reset();
+      if (success) {
+        form.reset();
+        // Optional: Navigate to dashboard or login page after successful verification
+        setTimeout(() => {
+          navigate('/profile');
+        }, 2000);
+      }
     } catch (err) {
       console.error('verification failed:', err);
     }
@@ -55,16 +85,18 @@ const VerifyEmail = () => {
   const handleResend = async () => {
     const email = form.getValues('email');
 
-    try {
-      await resendSignUpOTp(email);
-
-      form.reset();
-    } catch (err) {
-      console.error('verification failed:', err);
+    if (!email) {
+      console.error('Email is required to resend code');
+      return;
     }
 
-    setResendTimer(60);
-    console.log('Code resent to:', email);
+    try {
+      await resendSignUpOTp(email);
+      setResendTimer(60);
+      console.log('Code resent to:', email);
+    } catch (err) {
+      console.error('Resend failed:', err);
+    }
   };
 
   return (
@@ -72,7 +104,13 @@ const VerifyEmail = () => {
       <div className="w-full max-w-md p-6 border rounded-md shadow-sm">
         <h2 className="text-xl font-bold mb-4">Verify Your Email</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Enter the 6-digit code sent to your email.
+          {emailFromState ? (
+            <>
+              Enter the 6-digit code sent to <strong>{emailFromState}</strong>
+            </>
+          ) : (
+            'Enter your email and the 6-digit code sent to your email.'
+          )}
         </p>
 
         {success && <p className="text-green-600">{success}</p>}
@@ -102,6 +140,8 @@ const VerifyEmail = () => {
                       type="email"
                       placeholder="you@example.com"
                       {...field}
+                      readOnly={!!emailFromState} // Make read-only if email was passed
+                      className={emailFromState ? 'bg-gray-50' : ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,7 +184,7 @@ const VerifyEmail = () => {
                 type="button"
                 variant="ghost"
                 onClick={handleResend}
-                disabled={resendTimer > 0}
+                disabled={resendTimer > 0 || !form.getValues('email')}
               >
                 {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
               </Button>

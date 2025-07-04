@@ -13,6 +13,8 @@ import Signup from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import VerifyEmail from './pages/VerifyEmail';
 import Profile from './pages/profile/Profile';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
 import NotFound from './pages/NotFound';
@@ -64,6 +66,9 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
             path="/signup"
@@ -82,7 +87,6 @@ function App() {
               </RedirectIfAuthenticatedAndVerified>
             }
           />
-          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route
             path="/profile"
             element={

@@ -182,4 +182,59 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null, success: null });
+
+    console.log('Resending OTP to:', email);
+    try {
+      const response = await apiInstance.post('/auth/forgot-password', {
+        email,
+      });
+
+      console.log('verification code resent:', response.data?.message);
+
+      set({
+        success: response.data?.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.log('error:', error?.response?.data?.message);
+      set({
+        error:
+          error?.response?.data?.message ||
+          'Error resending verification otp. Try again.',
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  resetPassword: async (data) => {
+    set({ isLoading: true, error: null, success: null });
+
+    try {
+      const response = await apiInstance.post('/auth/reset-password', {
+        email: data.email,
+        otp: data.otp,
+        password: data.password,
+      });
+
+      console.log('Password reset successful:', response.data?.message);
+
+      set({
+        success: response.data?.message || 'Password reset successful',
+        isLoading: false,
+      });
+    } catch (error) {
+      console.log('Reset password error:', error?.response?.data?.message);
+      set({
+        error:
+          error?.response?.data?.message ||
+          'Error resetting password. Try again.',
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
 }));

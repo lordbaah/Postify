@@ -34,7 +34,10 @@ const Signup = () => {
       form.reset();
 
       setTimeout(() => {
-        navigate('/verify-email');
+        // Pass the email to the verification page
+        navigate('/verify-email', {
+          state: { email: data.email },
+        });
       }, 3000);
     } catch (err) {
       console.error('Signup failed:', err);
