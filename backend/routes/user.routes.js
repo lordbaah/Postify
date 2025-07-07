@@ -15,7 +15,7 @@ userRouter.get('/', verifyToken, authorizeRoles('admin'), getUsers);
 userRouter.get('/admin', verifyToken, authorizeRoles('admin'), (req, res) => {
   res.send({ message: 'Welcome Admin!' });
 });
-userRouter.patch(
+userRouter.put(
   '/role/:id',
   verifyToken,
   authorizeRoles('admin'),
@@ -33,10 +33,10 @@ userRouter.get('/profile', verifyToken, (req, res, next) => {
 userRouter.get('/profile/:id', verifyToken, getUser);
 
 // Profile update routes
-userRouter.patch('/profile', verifyToken, (req, res, next) => {
+userRouter.put('/profile', verifyToken, (req, res, next) => {
   // For updating own profile (no ID parameter needed)
   updateProfile(req, res, next);
 });
-userRouter.patch('/profile/:id', verifyToken, updateProfile);
+userRouter.put('/profile/:id', verifyToken, updateProfile);
 
 export default userRouter;

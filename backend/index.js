@@ -7,6 +7,8 @@ import cors from 'cors';
 
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
+import postRouter from './routes/post.route.js';
+import categoryRouter from './routes/category.routes.js';
 
 const app = express();
 
@@ -25,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/blog', postRouter);
+app.use('/api/v1/blog', categoryRouter);
 
 app.get('/api/v1', (req, res) => {
   res.send('blog api is running');
