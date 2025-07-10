@@ -12,14 +12,6 @@ export const createPost = async (req, res, next) => {
       });
     }
 
-    const userId = req.user?.id || req.userId;
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'User authentication required',
-      });
-    }
-
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(404).json({

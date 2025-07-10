@@ -1,12 +1,11 @@
 import Category from '../models/category.model.js';
 import Post from '../models/post.model.js';
 
-// Create Category (Admin only)
+// Create Category
 export const createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
 
-    // Validate required fields
     if (!name) {
       return res.status(422).json({
         success: false,
@@ -14,17 +13,6 @@ export const createCategory = async (req, res, next) => {
       });
     }
 
-    // Get user from request from auth middleware)
-    const userId = req.user?.id || req.userId;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'User authentication required',
-      });
-    }
-
-    // Check if category already exists
     const existingCategory = await Category.findOne({ name });
 
     if (existingCategory) {
@@ -34,14 +22,12 @@ export const createCategory = async (req, res, next) => {
       });
     }
 
-    // Create the category
     const newCategory = await Category.create({
       name: name.trim(),
       description: description?.trim(),
       createdBy: userId,
     });
 
-    // Send success response
     res.status(201).json({
       success: true,
       message: 'Category created successfully',
@@ -71,7 +57,7 @@ export const getAllCategories = async (req, res, next) => {
   }
 };
 
-// Update category (Admin only)
+// Update category
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -153,7 +139,6 @@ export const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // 1. Check if category exists
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({
@@ -162,7 +147,6 @@ export const deleteCategory = async (req, res, next) => {
       });
     }
 
-    // 2. Check if any posts reference this category
     const postCount = await Post.countDocuments({ category: id });
     if (postCount > 0) {
       return res.status(400).json({
@@ -171,7 +155,6 @@ export const deleteCategory = async (req, res, next) => {
       });
     }
 
-    // 3. Delete the category
     await Category.findByIdAndDelete(id);
 
     res.status(200).json({
