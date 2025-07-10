@@ -310,7 +310,7 @@ export const forgotPassword = async (req, res, next) => {
 };
 
 export const resetPassword = async (req, res, next) => {
-  const { email, otp, newPassword } = req.body; // Only require email and OTP
+  const { email, otp, newPassword } = req.body;
 
   try {
     if (!email || !otp || !newPassword) {

@@ -48,13 +48,46 @@ export const getAllPosts = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    // Add category filter by name
+    const filter = {};
+    if (req.query.category) {
+      // First find the category by name to get its ID
+      const categoryDoc = await Category.findOne({ name: req.query.category });
+      if (!categoryDoc) {
+        return res.status(404).json({
+          success: false,
+          message: `Category '${req.query.category}' not found`,
+        });
+      }
+      filter.category = categoryDoc._id;
+    }
+
+    const posts = await Post.find(filter)
       .populate('author', 'firstName lastName userName')
+      .populate('category', 'name')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalPosts = await Post.countDocuments();
+    const totalPosts = await Post.countDocuments(filter);
+
+    // Check if no posts found for the category
+    if (req.query.category && totalPosts === 0) {
+      return res.status(200).json({
+        success: true,
+        message: `No posts found for category '${req.query.category}'`,
+        data: {
+          posts: [],
+          pagination: {
+            currentPage: page,
+            totalPages: 0,
+            totalPosts: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        },
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -78,10 +111,9 @@ export const getPostById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const post = await Post.findById(id).populate(
-      'author',
-      'firstName lastName userName'
-    );
+    const post = await Post.findById(id)
+      .populate('author', 'firstName lastName userName')
+      .populate('category', 'name');
 
     if (!post) {
       return res.status(404).json({

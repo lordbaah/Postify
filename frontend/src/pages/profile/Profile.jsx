@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useUserStore } from '@/store/userStore';
 import {
   Card,
   CardContent,
@@ -14,17 +16,30 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
 const Profile = () => {
-  const { user, signout } = useAuthStore();
+  const { signout } = useAuthStore();
+  const { user, getUserProfile, isLoading, error } = useUserStore();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getUserProfile();
+  }, []);
 
   const handleSignOut = async () => {
     await signout();
     navigate('/signin');
   };
 
+  if (isLoading) {
+    return <div className="p-4">Loading user profile...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
+
   if (!user) {
-    return <div className="p-4">Loading user information...</div>;
+    return <div className="p-4">No user profile data found.</div>;
   }
 
   // Create initials fallback (e.g., "John Doe" → "JD")

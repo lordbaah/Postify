@@ -1,4 +1,5 @@
 import './App.css';
+import { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,52 +14,34 @@ import Signup from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import VerifyEmail from './pages/VerifyEmail';
 import Profile from './pages/profile/Profile';
+import DashboardLayout from './pages/DashboardLayout';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import { useAuthStore } from './store/authStore';
-import { useEffect } from 'react';
 import NotFound from './pages/NotFound';
-
-// Redirects authenticated and verified users to the profile page
-const RedirectIfAuthenticatedAndVerified = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  if (isAuthenticated && user?.isVerified) {
-    return <Navigate to="/profile" replace />;
-  }
-
-  return children;
-};
-
-// Redirects authenticated and verified users to the profile page
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  // Check if the user is logged in and verified
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
-  }
-
-  if (!user.isVerified) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
-  return children;
-};
+import ProtectedRoute from './routeGuards/ProtectedRoute';
+import RedirectIfAuthenticated from './routeGuards/RedirectIfAuthenticated';
+import { useAuthStore } from './store/authStore';
+import { useUserStore } from './store/userStore';
+import CreatePost from './pages/blogpost/CreatePost';
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
+  // const { isCheckingAuth, getUserProfile, isAuthenticated, user } =
+  //   useUserStore();
 
   // if (isCheckingAuth) return <div>Loading...</div>;
 
+  // useEffect(() => {
+  //   getUserProfile();
+  // }, []);
   useEffect(() => {
     checkAuth();
   }, []);
 
   if (isCheckingAuth) return <div>Loading...</div>;
 
-  console.log('isAuthenticated:', isAuthenticated);
-  console.log('user:', user);
+  // console.log('isAuthenticated:', isAuthenticated);
+  // console.log('user:', user);
 
   return (
     <>
@@ -73,28 +56,34 @@ function App() {
           <Route
             path="/signup"
             element={
-              <RedirectIfAuthenticatedAndVerified>
+              <RedirectIfAuthenticated>
                 <Signup />
-              </RedirectIfAuthenticatedAndVerified>
+              </RedirectIfAuthenticated>
             }
           />
 
           <Route
             path="/signin"
             element={
-              <RedirectIfAuthenticatedAndVerified>
+              <RedirectIfAuthenticated>
                 <SignIn />
-              </RedirectIfAuthenticatedAndVerified>
+              </RedirectIfAuthenticated>
             }
           />
+
           <Route
-            path="/profile"
+            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Profile />
+                <DashboardLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="profile" replace />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="new-post" element={<CreatePost />} />
+            {/* Add other sub-routes here later */}
+          </Route>
 
           <Route path="*" element={<NotFound />} />
         </Routes>

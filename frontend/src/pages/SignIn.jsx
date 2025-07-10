@@ -35,7 +35,7 @@ const SignIn = () => {
       form.reset();
 
       setTimeout(() => {
-        navigate('/profile');
+        navigate('/dashboard/profile');
       }, 3000);
     } catch (err) {
       console.error('Signup failed:', err);

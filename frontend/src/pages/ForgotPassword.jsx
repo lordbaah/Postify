@@ -26,7 +26,7 @@ const ForgotPassword = () => {
 
   const handleForgotPassword = async (data) => {
     try {
-      await forgotPassword(data);
+      await forgotPassword(data.email);
 
       // Navigate to reset password page with email
       setTimeout(() => {

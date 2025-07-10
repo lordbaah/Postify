@@ -1,0 +1,12 @@
+Test basic pagination:
+GET http://localhost:YOUR_PORT/blog/posts
+GET http://localhost:YOUR_PORT/blog/posts?page=1&limit=5
+GET http://localhost:YOUR_PORT/blog/posts?page=2&limit=5
+
+Test category filtering:
+GET http://localhost:YOUR_PORT/blog/posts?category=Technology
+GET http://localhost:YOUR_PORT/blog/posts?category=Health
+GET http://localhost:YOUR_PORT/blog/posts?category=NonExistentCategory
+
+Test category with pagination:
+GET http://localhost:YOUR_PORT/blog/posts?category=Technology&page=1&limit=3

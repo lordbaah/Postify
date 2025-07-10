@@ -220,7 +220,7 @@ const ResetPassword = () => {
                     </InputOTP>
                   </FormControl>
                   <FormDescription>
-                    <div className="flex justify-between items-center">
+                    <span className="flex justify-between items-center">
                       <span>Code expires in 10 minutes</span>
                       <Button
                         type="button"
@@ -234,7 +234,7 @@ const ResetPassword = () => {
                           ? `Resend in ${resendTimer}s`
                           : 'Resend Code'}
                       </Button>
-                    </div>
+                    </span>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

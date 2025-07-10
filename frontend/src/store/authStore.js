@@ -217,7 +217,7 @@ export const useAuthStore = create((set) => ({
       const response = await apiInstance.post('/auth/reset-password', {
         email: data.email,
         otp: data.otp,
-        password: data.password,
+        newPassword: data.password,
       });
 
       console.log('Password reset successful:', response.data?.message);
