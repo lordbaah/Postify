@@ -12,7 +12,8 @@ const postSchema = new mongoose.Schema(
 
     image: {
       type: String,
-      required: [true, 'Image URL is required'],
+      // required: [true, 'Image URL is required'],
+      required: false,
       trim: true,
       minlength: 2,
     },

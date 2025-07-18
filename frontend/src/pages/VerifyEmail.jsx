@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,20 +26,29 @@ const VerifyEmail = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get email from navigation state or auth store
+  // Get email from navigation state
   const emailFromState = location.state?.email;
 
-  console.log(location);
-
-  const { verifyaccount, resendSignUpOTp, isLoading, success, error } =
-    useAuthStore();
+  const {
+    verifyaccount,
+    resendSignUpOTp,
+    isLoading,
+    success,
+    error,
+    clearMessages,
+  } = useAuthStore();
 
   const form = useForm({
     defaultValues: {
-      email: emailFromState || '', // Auto-populate with passed email
+      email: emailFromState || '',
       otp: '',
     },
   });
+
+  // Clear messages when component mounts
+  useEffect(() => {
+    clearMessages();
+  }, [clearMessages]);
 
   // Set email in form when component mounts or email changes
   useEffect(() => {
@@ -46,6 +56,26 @@ const VerifyEmail = () => {
       form.setValue('email', emailFromState);
     }
   }, [emailFromState, form]);
+
+  // Handle success messages
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      form.reset();
+
+      // Navigate to profile after successful verification
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
+    }
+  }, [success, form, navigate]);
+
+  // Handle error messages
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   // Handle resend timer
   useEffect(() => {
@@ -58,7 +88,7 @@ const VerifyEmail = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Optional: Redirect if no email is provided
+  // Redirect if no email is provided (optional)
   useEffect(() => {
     if (!emailFromState) {
       // Uncomment this if you want to redirect users without email back to signup
@@ -69,16 +99,10 @@ const VerifyEmail = () => {
   const handleEmailVerification = async (data) => {
     try {
       await verifyaccount(data);
-
-      if (success) {
-        form.reset();
-        // Optional: Navigate to dashboard or login page after successful verification
-        setTimeout(() => {
-          navigate('/profile');
-        }, 2000);
-      }
+      // Success/error handling is done in useEffect above
     } catch (err) {
-      console.error('verification failed:', err);
+      console.error('Verification failed:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
@@ -86,16 +110,17 @@ const VerifyEmail = () => {
     const email = form.getValues('email');
 
     if (!email) {
-      console.error('Email is required to resend code');
+      toast.error('Email is required to resend code');
       return;
     }
 
     try {
       await resendSignUpOTp(email);
       setResendTimer(60);
-      console.log('Code resent to:', email);
+      toast.success('Verification code resent successfully');
     } catch (err) {
       console.error('Resend failed:', err);
+      toast.error('Failed to resend code. Please try again.');
     }
   };
 
@@ -112,9 +137,6 @@ const VerifyEmail = () => {
             'Enter your email and the 6-digit code sent to your email.'
           )}
         </p>
-
-        {success && <p className="text-green-600">{success}</p>}
-        {error && <p className="text-red-600">{error}</p>}
 
         <Form {...form}>
           <form
@@ -140,7 +162,7 @@ const VerifyEmail = () => {
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      readOnly={!!emailFromState} // Make read-only if email was passed
+                      readOnly={!!emailFromState}
                       className={emailFromState ? 'bg-gray-50' : ''}
                     />
                   </FormControl>
@@ -184,7 +206,9 @@ const VerifyEmail = () => {
                 type="button"
                 variant="ghost"
                 onClick={handleResend}
-                disabled={resendTimer > 0 || !form.getValues('email')}
+                disabled={
+                  resendTimer > 0 || !form.getValues('email') || isLoading
+                }
               >
                 {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
               </Button>

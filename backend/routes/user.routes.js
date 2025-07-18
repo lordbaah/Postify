@@ -4,6 +4,8 @@ import {
   getUser,
   updateProfile,
   updateUserRole,
+  getUserPosts,
+  getUserComments,
 } from '../controllers/user.controller.js';
 import verifyToken from '../middlewares/auth.middleware.js';
 import authorizeRoles from '../middlewares/authorize.middle.js';
@@ -31,6 +33,11 @@ userRouter.get('/profile', verifyToken, (req, res, next) => {
   getUser(req, res, next);
 });
 userRouter.get('/profile/:id', verifyToken, getUser);
+
+// Get list of posts by authenticated user
+userRouter.get('/posts', verifyToken, getUserPosts);
+
+userRouter.get('/comments', verifyToken, getUserComments);
 
 // Profile update routes
 userRouter.put('/profile', verifyToken, (req, res, next) => {

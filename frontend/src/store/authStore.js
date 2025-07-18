@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import apiInstance from '@/services/api';
 
 export const useAuthStore = create((set) => ({
-  //initial states
+  // Initial states
   user: null,
   isAuthenticated: false,
   error: null,
@@ -10,14 +10,14 @@ export const useAuthStore = create((set) => ({
   isLoading: false,
   isCheckingAuth: true,
 
-  //sign up logic
+  // Clear messages - call this when component unmounts or before new actions
+  clearMessages: () => set({ error: null, success: null }),
+
+  // Sign up logic
   signup: async (data) => {
-    //initail state
     set({ isLoading: true, error: null, success: null });
 
     try {
-      console.log('Incoming signup data:', data);
-
       const response = await apiInstance.post('/auth/signup', {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -26,8 +26,7 @@ export const useAuthStore = create((set) => ({
         password: data.password,
       });
 
-      console.log('Signup success:', response.data);
-      const user = response.data.data.user;
+      const user = response.data?.data?.user;
 
       set({
         user: user,
@@ -35,27 +34,29 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
+      const errorMessage =
+        error.response?.data?.message || 'Error signing up. Try again.';
       set({
-        error: error.response.data.message || 'Error signing up. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Verify account
   verifyaccount: async (data) => {
     set({ isLoading: true, error: null, success: null });
-    try {
-      console.log('Verifying with:', data); // should contain email or user ID and OTP
 
+    try {
       const response = await apiInstance.post('/auth/verify-email', {
         email: data.email,
         otp: data.otp,
       });
 
-      console.log('verification success:', response.data?.message);
       const user = response.data.data.user;
 
       set({
@@ -64,27 +65,28 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      return { success: true, message: response.data?.message };
     } catch (error) {
-      console.log('error:', error?.response?.data?.message);
+      const errorMessage =
+        error?.response?.data?.message || 'Error verifying email. Try again.';
       set({
-        error:
-          error?.response?.data?.message || 'Error Verifying email. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Resend signup OTP
   resendSignUpOTp: async (email) => {
     set({ isLoading: true, error: null, success: null });
 
-    console.log('Resending OTP to:', email);
     try {
       const response = await apiInstance.post('/auth/resend-verification', {
         email,
       });
 
-      console.log('verification code resent:', response.data?.message);
       const user = response.data.data.user;
 
       set({
@@ -92,31 +94,30 @@ export const useAuthStore = create((set) => ({
         success: response.data?.message,
         isLoading: false,
       });
+
+      return { success: true, message: response.data?.message };
     } catch (error) {
-      console.log('error:', error?.response?.data?.message);
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Error resending verification otp. Try again.';
       set({
-        error:
-          error?.response?.data?.message ||
-          'Error resending verification otp. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Sign in
   signin: async (data) => {
-    //initail state
     set({ isLoading: true, error: null, success: null });
 
     try {
-      console.log('Incoming signup data:', data);
-
       const response = await apiInstance.post('/auth/signin', {
         email: data.email,
         password: data.password,
       });
 
-      console.log('Signin success:', response.data);
       const token = response.data.data.token;
       const user = response.data.data.user;
 
@@ -132,16 +133,20 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
+      const errorMessage =
+        error.response?.data?.message || 'Error signing in. Try again.';
       set({
-        error: error.response?.data?.message || 'Error signing in. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Check auth
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
 
@@ -155,8 +160,6 @@ export const useAuthStore = create((set) => ({
         isCheckingAuth: false,
       });
     } catch (error) {
-      console.log('checkAuth failed:', error?.response?.data?.message);
-
       set({
         user: null,
         isAuthenticated: false,
@@ -165,11 +168,14 @@ export const useAuthStore = create((set) => ({
     }
   },
 
+  // Sign out
   signout: async () => {
     set({ isLoading: true, error: null, success: null });
+
     try {
       const response = await apiInstance.post('/auth/signout');
       localStorage.removeItem('token');
+
       set({
         user: null,
         isAuthenticated: false,
@@ -177,39 +183,46 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
         success: response.data.message,
       });
+
+      return { success: true, message: response.data.message };
     } catch (error) {
-      set({ error: 'Error logging out', isLoading: false });
-      throw error;
+      const errorMessage = 'Error logging out';
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Forgot password
   forgotPassword: async (email) => {
     set({ isLoading: true, error: null, success: null });
 
-    console.log('Resending OTP to:', email);
     try {
       const response = await apiInstance.post('/auth/forgot-password', {
         email,
       });
 
-      console.log('verification code resent:', response.data?.message);
-
       set({
         success: response.data?.message,
         isLoading: false,
       });
+
+      return { success: true, message: response.data?.message };
     } catch (error) {
-      console.log('error:', error?.response?.data?.message);
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Error sending reset email. Try again.';
       set({
-        error:
-          error?.response?.data?.message ||
-          'Error resending verification otp. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 
+  // Reset password
   resetPassword: async (data) => {
     set({ isLoading: true, error: null, success: null });
 
@@ -220,21 +233,24 @@ export const useAuthStore = create((set) => ({
         newPassword: data.password,
       });
 
-      console.log('Password reset successful:', response.data?.message);
-
       set({
         success: response.data?.message || 'Password reset successful',
         isLoading: false,
       });
+
+      return {
+        success: true,
+        message: response.data?.message || 'Password reset successful',
+      };
     } catch (error) {
-      console.log('Reset password error:', error?.response?.data?.message);
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Error resetting password. Try again.';
       set({
-        error:
-          error?.response?.data?.message ||
-          'Error resetting password. Try again.',
+        error: errorMessage,
         isLoading: false,
       });
-      throw error;
+      return { success: false, message: errorMessage };
     }
   },
 }));

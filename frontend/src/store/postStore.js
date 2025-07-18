@@ -2,142 +2,98 @@ import { create } from 'zustand';
 import apiInstance from '@/services/api';
 
 export const usePostStore = create((set) => ({
-  //initial states
   error: null,
   success: null,
   isLoading: false,
+  blogPosts: [],
+  currentPost: null,
 
-  //creating new post
+  clearMessages: () => set({ error: null, success: null }),
+
   createBlogPost: async (data) => {
-    //initail state
     set({ isLoading: true, error: null, success: null });
 
     try {
-      console.log('blog post data:', data);
+      const response = await apiInstance.post('/blog/posts', data);
+      console.log(response);
 
-      const response = await apiInstance.post('/blog/posts', {
-        title: data.title,
-        image: data.image,
-        content: data.content,
-        category: data.category,
-      });
-
-      console.log('creating post success:', response.data);
-
-      set({
-        success: response.data.message,
-        isLoading: false,
-      });
+      set({ success: response.data.message, isLoading: false });
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
-      set({
-        error: error.response.data.message || 'Error creatng post. Try again.',
-        isLoading: false,
-      });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || 'Error creating post. Try again.';
+      console.log('error:', errorMessage);
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, message: errorMessage };
     }
   },
 
-  getAllBlogPost: async () => {
+  getAllBlogPosts: async () => {
     set({ isLoading: true, error: null, success: null });
 
     try {
       const response = await apiInstance.get('/blog/posts');
-      const blogPosts = response.data.posts;
-
-      set({
-        success: response.data.message,
-        isLoading: false,
-      });
+      set({ blogPosts: response.data.data?.posts || [], isLoading: false });
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
-      set({
-        error: error.response.data.message || 'Error getting post. Try again.',
-        isLoading: false,
-      });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || 'Error fetching posts. Try again.';
+      console.log('error:', errorMessage);
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, message: errorMessage };
     }
   },
 
-  getSingleBlogPost: async () => {
+  getSinglePost: async (id) => {
     set({ isLoading: true, error: null, success: null });
 
     try {
-      const response = await apiInstance.get('/blog/posts/:id');
-      const blogPosts = response.data.post;
-
-      set({
-        // success: response.data.message,
-        isLoading: false,
-      });
+      const response = await apiInstance.get(`/blog/posts/${id}`);
+      set({ currentPost: response.data.post, isLoading: false });
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
-      set({
-        error: error.response.data.message || 'Error getting post. Try again.',
-        isLoading: false,
-      });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || 'Error fetching post. Try again.';
+      console.log('error:', errorMessage);
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, message: errorMessage };
     }
   },
 
-  //editing new post
-  editBlogPost: async (data) => {
-    //initail state
+  editBlogPost: async (id, data) => {
     set({ isLoading: true, error: null, success: null });
 
     try {
-      console.log('blog post data:', data);
-
-      const response = await apiInstance.put('/blog/posts/:id', {
-        title: data.title,
-        image: data.image,
-        content: data.content,
-        category: data.category,
-      });
-
-      console.log('creating post success:', response.data);
-
-      set({
-        success: response.data.message,
-        isLoading: false,
-      });
+      const response = await apiInstance.put(`/blog/posts/${id}`, data);
+      set({ success: response.data.message, isLoading: false });
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
-      set({
-        error: error.response.data.message || 'Error creatng post. Try again.',
-        isLoading: false,
-      });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || 'Error editing post. Try again.';
+      console.log('error:', errorMessage);
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, message: errorMessage };
     }
   },
 
-  deleteBlogPost: async (data) => {
-    //initail state
+  deleteBlogPost: async (id) => {
     set({ isLoading: true, error: null, success: null });
 
     try {
-      console.log('blog post data:', data);
-
-      const response = await apiInstance.delete('/blog/posts/:id', {
-        title: data.title,
-        image: data.image,
-        content: data.content,
-        category: data.category,
-      });
-
-      console.log('creating post success:', response.data);
-
-      set({
+      const response = await apiInstance.delete(`/blog/posts/${id}`);
+      set((state) => ({
+        blogPosts: state.blogPosts.filter((post) => post.id !== id),
+        currentPost: state.currentPost?.id === id ? null : state.currentPost,
         success: response.data.message,
         isLoading: false,
-      });
+      }));
+      return { success: true, message: response.data.message };
     } catch (error) {
-      console.log('error:', error.response.data.message);
-      set({
-        error: error.response.data.message || 'Error creatng post. Try again.',
-        isLoading: false,
-      });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || 'Error deleting post. Try again.';
+      console.log('error:', errorMessage);
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, message: errorMessage };
     }
   },
 }));

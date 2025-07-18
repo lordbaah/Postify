@@ -18,8 +18,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
-
 import { useAuthStore } from '@/store/authStore';
+import { toast } from 'react-toastify';
 
 const ResetPassword = () => {
   const [resendTimer, setResendTimer] = useState(0);
@@ -28,12 +28,16 @@ const ResetPassword = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Get email from navigation state
   const emailFromState = location.state?.email;
 
-  const { resetPassword, forgotPassword, isLoading, success, error } =
-    useAuthStore();
+  const {
+    resetPassword,
+    forgotPassword,
+    isLoading,
+    error,
+    success,
+    clearMessages,
+  } = useAuthStore();
 
   const form = useForm({
     defaultValues: {
@@ -44,33 +48,46 @@ const ResetPassword = () => {
     },
   });
 
-  // Set email in form when component mounts
+  useEffect(() => {
+    clearMessages();
+  }, [clearMessages]);
+
   useEffect(() => {
     if (emailFromState) {
       form.setValue('email', emailFromState);
     }
   }, [emailFromState, form]);
 
-  // Handle resend timer
-  useEffect(() => {
-    let interval;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [resendTimer]);
-
-  // Redirect if no email provided
   useEffect(() => {
     if (!emailFromState) {
       navigate('/forgot-password');
     }
   }, [emailFromState, navigate]);
 
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [resendTimer]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      form.reset();
+      setTimeout(() => navigate('/signin'), 2000);
+    }
+  }, [success, form, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   const handleResetPassword = async (data) => {
-    // Check if passwords match
     if (data.password !== data.confirmPassword) {
       form.setError('confirmPassword', {
         type: 'manual',
@@ -81,41 +98,24 @@ const ResetPassword = () => {
 
     try {
       await resetPassword(data);
-
-      if (success) {
-        form.reset();
-        setTimeout(() => {
-          navigate('/signin');
-        }, 2000);
-      }
     } catch (err) {
       console.error('Reset password failed:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
   const handleResendCode = async () => {
     const email = form.getValues('email');
-
-    if (!email) {
-      console.error('Email is required to resend code');
-      return;
-    }
+    if (!email) return;
 
     try {
       await forgotPassword(email);
       setResendTimer(60);
-      console.log('Code resent to:', email);
+      toast.success('Verification code resent.');
     } catch (err) {
       console.error('Resend failed:', err);
+      toast.error('Could not resend code. Try again.');
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -137,38 +137,18 @@ const ResetPassword = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Reset Password</h2>
             <p className="text-sm text-gray-600 mt-2">
-              {emailFromState ? (
-                <>
-                  Enter the 6-digit code sent to{' '}
-                  <strong>{emailFromState}</strong> and your new password.
-                </>
-              ) : (
-                'Enter your email, verification code, and new password.'
-              )}
+              Enter the 6-digit code sent to <strong>{emailFromState}</strong>{' '}
+              and your new password.
             </p>
           </div>
         </div>
 
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-green-800 text-sm">{success}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Form */}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleResetPassword)}
             className="space-y-6"
           >
-            {/* Email Input */}
+            {/* Email */}
             <FormField
               control={form.control}
               name="email"
@@ -181,7 +161,7 @@ const ResetPassword = () => {
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -196,7 +176,7 @@ const ResetPassword = () => {
               )}
             />
 
-            {/* OTP Input */}
+            {/* OTP */}
             <FormField
               control={form.control}
               name="otp"
@@ -241,7 +221,7 @@ const ResetPassword = () => {
               )}
             />
 
-            {/* New Password Input */}
+            {/* New Password */}
             <FormField
               control={form.control}
               name="password"
@@ -268,7 +248,7 @@ const ResetPassword = () => {
                         variant="ghost"
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={togglePasswordVisibility}
+                        onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -283,13 +263,11 @@ const ResetPassword = () => {
               )}
             />
 
-            {/* Confirm Password Input */}
+            {/* Confirm Password */}
             <FormField
               control={form.control}
               name="confirmPassword"
-              rules={{
-                required: 'Please confirm your password',
-              }}
+              rules={{ required: 'Please confirm your password' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm New Password</FormLabel>
@@ -306,7 +284,7 @@ const ResetPassword = () => {
                         variant="ghost"
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={toggleConfirmPasswordVisibility}
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4" />

@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import {
   Form,
   FormField,
@@ -10,37 +11,58 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
+import { toast } from 'react-toastify';
 import { useAuthStore } from '@/store/authStore';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {
   const form = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
+
       userName: '',
       email: '',
       password: '',
     },
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePassword = () => setShowPassword((prev) => !prev);
+
   const navigate = useNavigate();
-  const { signup, isLoading, success, error } = useAuthStore();
+  const { signup, isLoading, error, success, clearMessages } = useAuthStore();
+
+  useEffect(() => {
+    clearMessages();
+  }, [clearMessages]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      form.reset();
+
+      const email = form.getValues('email');
+      setTimeout(() => {
+        navigate('/verify-email', {
+          state: { email },
+        });
+      }, 2000);
+    }
+  }, [success, form, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSignUp = async (data) => {
     try {
       await signup(data);
-
-      form.reset();
-
-      setTimeout(() => {
-        // Pass the email to the verification page
-        navigate('/verify-email', {
-          state: { email: data.email },
-        });
-      }, 3000);
     } catch (err) {
       console.error('Signup failed:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
@@ -48,9 +70,6 @@ const Signup = () => {
     <section>
       <div className="max-w-md mx-auto p-6">
         <h2 className="text-xl font-bold mb-4">Sign Up</h2>
-
-        {success && <p className="text-green-600">{success}</p>}
-        {error && <p className="text-red-600">{error}</p>}
 
         <Form {...form}>
           <form
@@ -108,7 +127,7 @@ const Signup = () => {
               rules={{
                 required: 'Email is required',
                 pattern: {
-                  value: /^\S+@\S+$/i,
+                  value: /^\S+@\S+\.\S+$/i,
                   message: 'Enter a valid email',
                 },
               }}
@@ -141,7 +160,26 @@ const Signup = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        {...field}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePassword}
+                        className="absolute right-2 top-2.5 text-gray-500 hover:text-gray-700"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,7 +196,7 @@ const Signup = () => {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing Up....' : 'Sign Up'}
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
             </Button>
           </form>
         </Form>

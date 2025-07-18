@@ -48,6 +48,7 @@ export const getAllCategories = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      message: 'Categories retrivied successfully',
       data: {
         categories,
       },
@@ -126,6 +127,7 @@ export const getCategoryById = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      message: 'Category retrivied successfully',
       data: {
         category,
       },

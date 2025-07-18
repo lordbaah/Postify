@@ -1,9 +1,11 @@
 import Post from '../models/post.model.js';
 import Category from '../models/category.model.js';
+import Comment from '../models/comment.model.js';
 
 export const createPost = async (req, res, next) => {
   try {
     const { title, image, content, category } = req.body;
+    const userId = req.user?.id || req.userId;
 
     if (!title || !content || !category) {
       return res.status(422).json({
@@ -91,6 +93,7 @@ export const getAllPosts = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      message: 'Posts retrived successfully',
       data: {
         posts,
         pagination: {
@@ -122,9 +125,18 @@ export const getPostById = async (req, res, next) => {
       });
     }
 
+    // === NEW: Fetch comments for this post ===
+    const comments = await Comment.find({ post: id })
+      .populate('user', 'firstName lastName userName') // Populate user details for comments
+      .sort({ created_at: 1 }); // Or -1 for latest first
+
     res.status(200).json({
       success: true,
-      data: { post },
+      message: 'Post retrieved successfully',
+      data: {
+        post: post,
+        comments: comments, // Include comments in the response data
+      },
     });
   } catch (error) {
     next(error);
@@ -135,7 +147,8 @@ export const updatePost = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, image, content, category } = req.body;
-    const userId = req.user?.id || req.userId;
+    // const userId = req.user?.id || req.userId;
+    const userId = req.user?.id ? req.user.id.toString() : null;
 
     // Find the post
     const post = await Post.findById(id);
@@ -181,7 +194,8 @@ export const updatePost = async (req, res, next) => {
 export const deletePost = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.userId;
+    // const userId = req.user?.id || req.userId;
+    const userId = req.user?.id ? req.user.id.toString() : null;
 
     const post = await Post.findById(id);
 

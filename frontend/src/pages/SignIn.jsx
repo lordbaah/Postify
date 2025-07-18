@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import {
   Form,
   FormField,
@@ -24,31 +24,37 @@ const SignIn = () => {
   });
 
   const navigate = useNavigate();
+  const { signin, isLoading, clearMessages } = useAuthStore();
 
-  const { signin, isLoading, success, error } = useAuthStore();
+  // Clear messages when component mounts
+  useEffect(() => {
+    clearMessages();
+  }, [clearMessages]);
 
   const handleSignIn = async (data) => {
     try {
-      await signin(data);
+      const result = await signin(data);
 
-      toast.success(success);
-      form.reset();
+      if (result.success) {
+        toast.success(result.message);
+        form.reset();
 
-      setTimeout(() => {
-        navigate('/dashboard/profile');
-      }, 3000);
+        // Navigate immediately or after a short delay
+        setTimeout(() => {
+          navigate('/dashboard/profile');
+        }, 1000);
+      } else {
+        toast.error(result.message);
+      }
     } catch (err) {
-      console.error('Signup failed:', err);
-      toast.error(error);
+      console.error('Signin failed:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6">
       <h2 className="text-xl font-bold mb-4">Sign Into Your Account</h2>
-
-      {success && <p className="text-green-600">{success}</p>}
-      {error && <p className="text-red-600">{error}</p>}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSignIn)} className="grid gap-4">
@@ -101,6 +107,7 @@ const SignIn = () => {
               Forgot Password?
             </Link>
           </div>
+
           <div className="text-right">
             <Link
               to="/signup"
@@ -111,7 +118,7 @@ const SignIn = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sign In....' : 'Sign In'}
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
         </form>
       </Form>

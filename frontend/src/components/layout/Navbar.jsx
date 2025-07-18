@@ -66,7 +66,7 @@ const Navbar = () => {
                   <NavLink to="/signup">Sign Up</NavLink>
                 </li>
                 <li onClick={closeMobileMenu}>
-                  <NavLink to="/profile">My Profile</NavLink>
+                  <NavLink to="/dashboard">My Profile</NavLink>
                 </li>
               </ul>
             </div>

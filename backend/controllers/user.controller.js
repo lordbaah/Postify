@@ -1,4 +1,6 @@
 import User from '../models/user.model.js';
+import Post from '../models/post.model.js';
+import Comment from '../models/comment.model.js';
 
 export const getUsers = async (req, res, next) => {
   try {
@@ -160,5 +162,74 @@ export const updateUserRole = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getUserPosts = async (req, res, next) => {
+  try {
+    const userId = req.user?.id || req.userId;
+    const userName = req.user?.userName;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Find posts by the authenticated user
+    const posts = await Post.find({ author: userId })
+      .populate('author', 'firstName lastName userName')
+      .populate('category', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Get total count for pagination
+    const totalPosts = await Post.countDocuments({ author: userId });
+
+    res.status(200).json({
+      success: true,
+      message: 'User posts retrieved successfully',
+      message: `Hello ${userName} here are your list of post`,
+      data: {
+        posts,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalPosts / limit),
+          totalPosts,
+          hasNextPage: page < Math.ceil(totalPosts / limit),
+          hasPrevPage: page > 1,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all comments made by a specific authenticated user
+
+export const getUserComments = async (req, res, next) => {
+  try {
+    const userId = req.user?.id; // Get user ID from authenticated user
+
+    const comments = await Comment.find({ user: userId })
+      .populate('post', 'title') // Populate post details
+      .sort({ created_at: -1 }); // Latest comments first
+
+    // --- NEW FEEDBACK LOGIC ---
+    if (comments.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'You have not made any comments yet.',
+        data: { comments: [] }, // Still return an empty array for consistency
+      });
+    }
+    // --- END NEW FEEDBACK LOGIC ---
+
+    res.status(200).json({
+      success: true,
+      message: 'Your comments retrieved successfully',
+      data: { comments },
+    });
+  } catch (error) {
+    next(error); // Pass error to central error handler
   }
 };

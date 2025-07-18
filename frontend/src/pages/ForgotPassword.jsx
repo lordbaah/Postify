@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   Form,
   FormField,
@@ -11,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Mail } from 'lucide-react';
-
+import { toast } from 'react-toastify';
 import { useAuthStore } from '@/store/authStore';
 
 const ForgotPassword = () => {
@@ -22,20 +23,45 @@ const ForgotPassword = () => {
   });
 
   const navigate = useNavigate();
-  const { forgotPassword, isLoading, success, error } = useAuthStore();
+  const { forgotPassword, isLoading, success, error, clearMessages } =
+    useAuthStore();
+
+  // Clear messages on mount
+  useEffect(() => {
+    clearMessages();
+  }, [clearMessages]);
+
+  // Show success toast and redirect
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      const email = form.getValues('email');
+
+      const timeout = setTimeout(() => {
+        clearMessages(); // ✅ Clear success before navigating
+        navigate('/reset-password', {
+          state: { email },
+        });
+      }, 2000);
+
+      return () => clearTimeout(timeout); // Cleanup
+    }
+  }, [success, form, navigate, clearMessages]);
+
+  // Show error toast and clear
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      clearMessages(); // ✅ Avoid duplicate toasts
+    }
+  }, [error, clearMessages]);
 
   const handleForgotPassword = async (data) => {
     try {
       await forgotPassword(data.email);
-
-      // Navigate to reset password page with email
-      setTimeout(() => {
-        navigate('/reset-password', {
-          state: { email: data.email },
-        });
-      }, 2000);
     } catch (err) {
       console.error('Forgot password failed:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
@@ -51,7 +77,6 @@ const ForgotPassword = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Sign In
           </Link>
-
           <div className="text-center">
             <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <Mail className="w-6 h-6 text-blue-600" />
@@ -65,19 +90,6 @@ const ForgotPassword = () => {
             </p>
           </div>
         </div>
-
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-green-800 text-sm">{success}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
-          </div>
-        )}
 
         {/* Form */}
         <Form {...form}>
