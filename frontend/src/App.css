@@ -1,8 +1,0 @@
-@import 'tailwindcss';
-
-/* my custom container */
-@layer utilities {
-  .custom-container {
-    @apply max-w-screen-xl mx-auto px-4 md:px-8 w-[95%];
-  }
-}
