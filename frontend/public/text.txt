@@ -1,0 +1,13 @@
+  // Redirect if already authenticated and verified
+  useEffect(() => {
+    if (isAuthenticated && user?.isVerified) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, user?.isVerified, navigate]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard'); // or wherever you want to redirect authenticated users
+    }
+  }, [isAuthenticated, navigate]);
