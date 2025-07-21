@@ -1,7 +1,6 @@
 // src/pages/Dashboard/UserNewPostPage.tsx
-import React from 'react';
 
-const UserNewPostPage: React.FC = () => {
+const UserNewPostPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-primary-dark mb-4">

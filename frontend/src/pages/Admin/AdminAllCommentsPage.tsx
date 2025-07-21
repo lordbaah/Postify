@@ -1,7 +1,7 @@
 // src/pages/Admin/AdminAllCommentsPage.tsx
 import React from 'react';
 
-const AdminAllCommentsPage: React.FC = () => {
+const AdminAllCommentsPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-primary-dark mb-4">

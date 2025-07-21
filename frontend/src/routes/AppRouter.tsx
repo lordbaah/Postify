@@ -22,8 +22,8 @@ const AppRouter = () => {
       </div>
     );
 
-  console.log('isAuthenticated:', isAuthenticated);
-  console.log('user:', user);
+  // console.log('isAuthenticated:', isAuthenticated);
+  // console.log('user:', user);
 
   return (
     <BrowserRouter>

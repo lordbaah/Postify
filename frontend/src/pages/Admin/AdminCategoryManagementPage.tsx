@@ -1,7 +1,6 @@
 // src/pages/Admin/AdminCategoryManagementPage.tsx
-import React from 'react';
 
-const AdminCategoryManagementPage: React.FC = () => {
+const AdminCategoryManagementPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-primary-dark mb-4">

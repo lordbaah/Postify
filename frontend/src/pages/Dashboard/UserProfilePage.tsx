@@ -1,8 +1,8 @@
 // src/pages/Dashboard/UserProfilePage.tsx
-import React from 'react';
+
 import { useAuthStore } from '@/store/authStore';
 
-const UserProfilePage: React.FC = () => {
+const UserProfilePage = () => {
   const { user } = useAuthStore();
 
   return (

@@ -1,7 +1,6 @@
 // src/pages/Dashboard/UserMyCommentsPage.tsx
-import React from 'react';
 
-const UserMyCommentsPage: React.FC = () => {
+const UserMyCommentsPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-primary-dark mb-4">My Comments</h1>

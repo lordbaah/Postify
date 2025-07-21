@@ -1,8 +1,8 @@
 // src/pages/Admin/AdminUserManagementPage.tsx
-import React from 'react';
+
 import { useAuthStore } from '@/store/authStore';
 
-const AdminUserManagementPage: React.FC = () => {
+const AdminUserManagementPage = () => {
   const { user } = useAuthStore();
   return (
     <div className="p-6">

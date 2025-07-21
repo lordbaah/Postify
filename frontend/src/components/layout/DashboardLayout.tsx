@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, signout } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
