@@ -39,7 +39,7 @@ export interface BlogPost {
   title: string;
   image: string | null;
   content: string;
-  category: Category;
+  category: Category | null;
   author: Author;
   published_at: string;
   createdAt: string;

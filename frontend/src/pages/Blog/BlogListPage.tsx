@@ -13,7 +13,8 @@ const BlogListPage = () => {
     getAllBlogPosts();
   }, []);
 
-  // console.log(blogPosts);
+  console.log(blogPosts);
+  console.log(blogPosts.map((blog) => console.log(blog?.category?.name)));
 
   if (isLoading) {
     return <h1>loading....</h1>;
@@ -27,7 +28,7 @@ const BlogListPage = () => {
           _id={post._id}
           title={post.title}
           // blogCategory={post.category.name}
-          blogCategory={post.category?.name}
+          blogCategory={post.category?.name || 'General'}
         />
       ))}
     </div>
