@@ -8,7 +8,14 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuthToast } from '@/hooks/useAuthToast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 const resetPasswordSchema = z
   .object({
@@ -33,23 +40,22 @@ const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const email = location.state?.email;
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ResetPasswordData>({
+  const form = useForm<ResetPasswordData>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      otp: '',
+      newPassword: '',
+      confirmNewPassword: '',
+    },
   });
 
   const { resetPassword, forgotPassword, isLoading } = useAuthStore();
-
   const [resendTimer, setResendTimer] = useState(60);
   const [isResending, setIsResending] = useState(false);
 
   useAuthToast();
 
-  // Countdown timer
+  // Countdown timer for resend
   useEffect(() => {
     if (resendTimer <= 0) return;
     const interval = setInterval(() => {
@@ -58,19 +64,15 @@ const ResetPasswordPage = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Handle resend code
   const handleResendCode = async () => {
     if (!email) {
       toast.error('Missing email. Please restart the reset process.');
       return;
     }
-
     try {
       setIsResending(true);
-
       await forgotPassword(email);
-
-      setResendTimer(60); // restart timer
+      setResendTimer(60);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Failed to resend code.';
       toast.error(msg);
@@ -79,13 +81,11 @@ const ResetPasswordPage = () => {
     }
   };
 
-  // Handle reset password form submit
   const handlePasswordReset = async (data: ResetPasswordData) => {
     if (!email) {
       toast.error('Missing email context. Please restart the reset process.');
       return;
     }
-
     const result = await resetPassword({
       email,
       otp: data.otp,
@@ -93,8 +93,7 @@ const ResetPasswordPage = () => {
     });
 
     if (result.success) {
-      reset();
-      // navigate('/signin');
+      form.reset();
       setTimeout(() => {
         navigate('/signin');
       }, 1500);
@@ -102,66 +101,102 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div>
-      <h1>Reset Your Password</h1>
+    <div className="max-w-md mx-auto py-10">
+      <h1 className="text-2xl font-semibold mb-4 text-center">
+        Reset Your Password
+      </h1>
+
       {email && (
-        <p>
+        <p className="text-center text-gray-600 mb-4">
           Resetting password for: <strong>{email}</strong>
         </p>
       )}
 
-      <form onSubmit={handleSubmit(handlePasswordReset)}>
-        <div>
-          <label>Verification Code</label>
-          <Input
-            type="tel"
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            placeholder="Enter the 6-digit code"
-            {...register('otp')}
-            onInput={(e) => {
-              const target = e.target as HTMLInputElement;
-              // Remove all non-digits and limit to 6 characters
-              target.value = target.value.replace(/\D/g, '').slice(0, 6);
-            }}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handlePasswordReset)}
+          className="grid gap-6"
+        >
+          {/* OTP Field */}
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Verification Code</FormLabel>
+                <FormControl>
+                  <Input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    placeholder="Enter the 6-digit code"
+                    {...field}
+                    onInput={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      target.value = target.value
+                        .replace(/\D/g, '')
+                        .slice(0, 6);
+                      field.onChange(target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.otp && <p>{errors.otp.message}</p>}
-        </div>
 
-        <div>
-          <Label>New Password</Label>
-          <Input
-            type="password"
-            placeholder="Enter new password"
-            {...register('newPassword')}
+          {/* New Password Field */}
+          <FormField
+            control={form.control}
+            name="newPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter new password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.newPassword && <p>{errors.newPassword.message}</p>}
-        </div>
 
-        <div>
-          <Label>Confirm New Password</Label>
-          <Input
-            type="password"
-            placeholder="Confirm new password"
-            {...register('confirmNewPassword')}
+          {/* Confirm Password Field */}
+          <FormField
+            control={form.control}
+            name="confirmNewPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm New Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Confirm new password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.confirmNewPassword && (
-            <p>{errors.confirmNewPassword.message}</p>
-          )}
-        </div>
 
-        <Button disabled={isLoading} type="submit">
-          {isLoading ? 'Sending Reset code.' : 'Send Reset Code'}
-        </Button>
-      </form>
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? 'Sending Reset Code...' : 'Send Reset Code'}
+          </Button>
+        </form>
+      </Form>
 
-      {/* Resend Code Section */}
-      <div style={{ marginTop: '1rem' }}>
+      {/* Resend Code */}
+      <div className="mt-6 text-center">
         <Button
           type="button"
           onClick={handleResendCode}
           disabled={resendTimer > 0 || isResending}
+          variant="outline"
         >
           {resendTimer > 0
             ? `Resend Code in ${resendTimer}s`

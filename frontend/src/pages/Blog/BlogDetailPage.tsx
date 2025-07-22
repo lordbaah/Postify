@@ -19,11 +19,12 @@ const BlogDetailPage = () => {
 
       {isLoading && <h2>Loading...</h2>}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       {currentPost && (
         <>
           <h2>{currentPost.title}</h2>
+          <p>Post made by {currentPost.author.firstName}</p>
           <p>{currentPost.content}</p>
         </>
       )}

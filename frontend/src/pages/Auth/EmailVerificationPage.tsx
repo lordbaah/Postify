@@ -8,7 +8,14 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuthToast } from '@/hooks/useAuthToast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 const verificationSchema = z.object({
   otp: z
@@ -25,22 +32,19 @@ const EmailVerificationPage = () => {
   const email = location.state?.email;
 
   const { verifyaccount, resendOtp } = useAuthStore();
-
   useAuthToast();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<VerificationData>({
+  const form = useForm<VerificationData>({
     resolver: zodResolver(verificationSchema),
+    defaultValues: {
+      otp: '',
+    },
   });
 
   const [resendTimer, setResendTimer] = useState(60);
   const [isResending, setIsResending] = useState(false);
 
-  // Countdown timer
+  // Countdown for resend button
   useEffect(() => {
     if (resendTimer <= 0) return;
     const interval = setInterval(() => {
@@ -50,16 +54,14 @@ const EmailVerificationPage = () => {
   }, [resendTimer]);
 
   const handleVerification = async (data: VerificationData) => {
-    const { otp } = data;
     if (!email) {
       toast.error('Missing email. Please start the process again.');
       return;
     }
 
-    const result = await verifyaccount({ email, otp });
-
+    const result = await verifyaccount({ email, otp: data.otp });
     if (result.success) {
-      reset();
+      form.reset();
       navigate('/');
     }
   };
@@ -72,12 +74,8 @@ const EmailVerificationPage = () => {
 
     try {
       setIsResending(true);
-
       const result = await resendOtp(email);
-
-      if (result.success) {
-        reset();
-      }
+      if (result.success) form.reset();
       setResendTimer(60);
     } catch {
       toast.error('Failed to resend code.');
@@ -87,40 +85,64 @@ const EmailVerificationPage = () => {
   };
 
   return (
-    <div>
-      <h2>Email Verification</h2>
+    <div className="max-w-md mx-auto py-10">
+      <h2 className="text-2xl font-semibold mb-4 text-center">
+        Email Verification
+      </h2>
+
       {email && (
-        <p>
+        <p className="text-center text-gray-600 mb-4">
           Verifying account for: <strong>{email}</strong>
         </p>
       )}
 
-      <form onSubmit={handleSubmit(handleVerification)}>
-        <div>
-          <Label>Verification Code</Label>
-          <Input
-            type="tel"
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            placeholder="Enter the 6-digit code"
-            {...register('otp')}
-            onInput={(e) => {
-              const target = e.target as HTMLInputElement;
-              // Remove all non-digits and limit to 6 characters
-              target.value = target.value.replace(/\D/g, '').slice(0, 6);
-            }}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleVerification)}
+          className="space-y-6"
+        >
+          {/* OTP Field */}
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Verification Code</FormLabel>
+                <FormControl>
+                  <Input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    placeholder="Enter the 6-digit code"
+                    {...field}
+                    onInput={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      target.value = target.value
+                        .replace(/\D/g, '')
+                        .slice(0, 6);
+                      field.onChange(target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.otp && <p>{errors.otp.message}</p>}
-        </div>
 
-        <Button type="submit">Verify Email</Button>
-      </form>
+          <Button type="submit" className="w-full">
+            Verify Email
+          </Button>
+        </form>
+      </Form>
 
-      <div className="mt-2">
+      {/* Resend Code Button */}
+      <div className="mt-6 text-center">
         <Button
+          type="button"
           onClick={handleResend}
           disabled={resendTimer > 0 || isResending}
+          variant="outline"
         >
           {resendTimer > 0
             ? `Resend Code in ${resendTimer}s`
