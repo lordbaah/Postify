@@ -17,6 +17,8 @@ export const usePostStore = create<PostState>((set) => ({
   isLoading: false,
   blogPosts: [],
   currentPost: null,
+  currentPostComments: [],
+  pagination: null, // Added pagination to initial state
 
   clearMessages: () => set({ error: null, success: null }),
 
@@ -38,13 +40,31 @@ export const usePostStore = create<PostState>((set) => ({
     }
   },
 
-  getAllBlogPosts: async (): Promise<OperationResult> => {
+  getAllBlogPosts: async (
+    page?: number,
+    limit?: number,
+    category?: string
+  ): Promise<OperationResult> => {
     set({ isLoading: true, error: null, success: null });
     try {
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (page) params.append('page', page.toString());
+      if (limit) params.append('limit', limit.toString());
+      if (category) params.append('category', category);
+
+      const queryString = params.toString();
+      const url = queryString ? `/blog/posts?${queryString}` : '/blog/posts';
+
       const response = await apiInstance.get<ApiResponse<BlogPostsResponse>>(
-        '/blog/posts'
+        url
       );
-      set({ blogPosts: response.data.data?.posts || [], isLoading: false });
+      // FIX: Store both posts and pagination from response.data.data
+      set({
+        blogPosts: response.data.data?.posts || [],
+        pagination: response.data.data?.pagination || null, // Added pagination storage
+        isLoading: false,
+      });
       return { success: true, message: response.data.message };
     } catch (error: any) {
       const errorMessage: string =
@@ -61,7 +81,12 @@ export const usePostStore = create<PostState>((set) => ({
       const response = await apiInstance.get<ApiResponse<SinglePostResponse>>(
         `/blog/posts/${id}`
       );
-      set({ currentPost: response.data.data?.post || null, isLoading: false });
+      // FIX: Store both post and comments
+      set({
+        currentPost: response.data.data?.post || null,
+        currentPostComments: response.data.data?.comments || [],
+        isLoading: false,
+      });
       return { success: true, message: response.data.message };
     } catch (error: any) {
       const errorMessage: string =

@@ -196,6 +196,7 @@ export const deletePost = async (req, res, next) => {
     const { id } = req.params;
     // const userId = req.user?.id || req.userId;
     const userId = req.user?.id ? req.user.id.toString() : null;
+    const currentUserRole = req.user.role;
 
     const post = await Post.findById(id);
 
@@ -206,8 +207,8 @@ export const deletePost = async (req, res, next) => {
       });
     }
 
-    // Check if user owns the post
-    if (post.author.toString() !== userId) {
+    // Check if user owns the post or admin is deleting the post
+    if (post.author.toString() !== userId || currentUserRole !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this post',

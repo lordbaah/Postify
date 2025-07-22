@@ -25,7 +25,7 @@ export const getUser = async (req, res, next) => {
 
     // Check if user is accessing their own profile or is an admin
     if (
-      String(requestedUserId) !== String(currentUserId) &&
+      String(requestedUserId) !== String(currentUserId) ||
       req.user.role !== 'admin'
     ) {
       return res.status(403).json({
@@ -62,7 +62,7 @@ export const updateProfile = async (req, res, next) => {
 
     // Check if user is updating their own profile or is an admin
     if (
-      String(requestedUserId) !== String(currentUserId) &&
+      String(requestedUserId) !== String(currentUserId) ||
       currentUserRole !== 'admin'
     ) {
       return res.status(403).json({

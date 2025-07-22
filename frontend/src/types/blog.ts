@@ -93,11 +93,17 @@ export interface PostState {
   isLoading: boolean;
   blogPosts: BlogPost[];
   currentPost: BlogPost | null;
+  currentPostComments: Comment[];
+  pagination: Pagination | null;
 
   // Actions
   clearMessages: () => void;
   createBlogPost: (data: CreateBlogPostData) => Promise<OperationResult>;
-  getAllBlogPosts: () => Promise<OperationResult>;
+  getAllBlogPosts: (
+    page?: number,
+    limit?: number,
+    category?: string
+  ) => Promise<OperationResult>;
   getSinglePost: (id: string) => Promise<OperationResult>;
   editBlogPost: (
     id: string,
