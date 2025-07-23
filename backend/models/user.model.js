@@ -40,6 +40,13 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Password is required'],
       minLength: 8,
     },
+    // Profile image field to store Cloudinary URL
+    profileImage: {
+      type: String,
+      required: false,
+      trim: true,
+      default: null, // No default profile image
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],
