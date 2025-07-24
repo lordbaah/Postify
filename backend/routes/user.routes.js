@@ -6,9 +6,13 @@ import {
   updateUserRole,
   getUserPosts,
   getUserComments,
+  updateProfileImage, // Import the new profile image update controller
+  deleteProfileImage, // Import the new profile image delete controller
 } from '../controllers/user.controller.js';
 import verifyToken from '../middlewares/auth.middleware.js';
 import authorizeRoles from '../middlewares/authorize.middle.js';
+// Import the specific Multer middleware for profile images
+import { uploadProfileImage } from '../middlewares/upload.middleware.js';
 
 const userRouter = Router();
 
@@ -37,6 +41,7 @@ userRouter.get('/profile/:id', verifyToken, getUser);
 // Get list of posts by authenticated user
 userRouter.get('/posts', verifyToken, getUserPosts);
 
+// Get list of comments by authenticated user
 userRouter.get('/comments', verifyToken, getUserComments);
 
 // Profile update routes
@@ -45,5 +50,17 @@ userRouter.put('/profile', verifyToken, (req, res, next) => {
   updateProfile(req, res, next);
 });
 userRouter.put('/profile/:id', verifyToken, updateProfile);
+
+// NEW: Route for updating user profile image
+// 'profileImage' should match the name attribute of your file input in the frontend form.
+userRouter.put(
+  '/profile/:id/image',
+  verifyToken,
+  uploadProfileImage.single('profileImage'),
+  updateProfileImage
+);
+
+// NEW: Route for deleting user profile image
+userRouter.delete('/profile/:id/image', verifyToken, deleteProfileImage);
 
 export default userRouter;

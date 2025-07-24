@@ -1,10 +1,15 @@
 import User from '../models/user.model.js';
 import Post from '../models/post.model.js';
 import Comment from '../models/comment.model.js';
+// Import Cloudinary helper functions from the config file
+import {
+  cloudinaryUpload,
+  deleteCloudinaryImage,
+  extractPublicId,
+} from '../config/cloudinary.config.js';
 
 export const getUsers = async (req, res, next) => {
   try {
-    // The authorizeRoles middleware already checks if the user is admin
     const users = await User.find().select('-password -otp -otpExpiry');
 
     res
@@ -17,15 +22,13 @@ export const getUsers = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    // console.log('Requested User ID:', typeof req.params.id);
-    // console.log('Token User ID:', typeof req.user.id);
-
     const requestedUserId = req.params.id;
     const currentUserId = req.user.id; // From auth middleware
 
     // Check if user is accessing their own profile or is an admin
+    // Corrected logic: user can view their own profile OR if they are an admin
     if (
-      String(requestedUserId) !== String(currentUserId) ||
+      String(requestedUserId) !== String(currentUserId) &&
       req.user.role !== 'admin'
     ) {
       return res.status(403).json({
@@ -56,13 +59,14 @@ export const getUser = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const requestedUserId = req.params.id || req.user.id; // Use params ID if provided, otherwise use authenticated user's ID
+    const requestedUserId = req.params.id || req.user.id;
     const currentUserId = req.user.id;
     const currentUserRole = req.user.role;
 
     // Check if user is updating their own profile or is an admin
+    // Corrected logic: user can update their own profile OR if they are an admin
     if (
-      String(requestedUserId) !== String(currentUserId) ||
+      String(requestedUserId) !== String(currentUserId) &&
       currentUserRole !== 'admin'
     ) {
       return res.status(403).json({
@@ -107,6 +111,165 @@ export const updateProfile = async (req, res, next) => {
       success: true,
       message: 'Profile updated successfully',
       data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Upload or update a user's profile image
+ * @route   PUT /api/users/:id/profile-image
+ * @access  Private (User/Admin)
+ */
+export const updateProfileImage = async (req, res, next) => {
+  let newUploadedImageUrl = null; // Variable to store the new Cloudinary URL for cleanup
+  try {
+    const requestedUserId = req.params.id;
+    const currentUserId = req.user.id;
+    const currentUserRole = req.user.role;
+
+    // Authorization: User can update their own profile image or an admin can update any.
+    if (
+      String(requestedUserId) !== String(currentUserId) &&
+      currentUserRole !== 'admin'
+    ) {
+      // If unauthorized, and a file was uploaded (now in req.file.buffer),
+      // we need to prevent it from being uploaded to Cloudinary.
+      // This is handled by the `newUploadedImageUrl` cleanup in the catch block if it gets uploaded before this check.
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only update your own profile image.',
+      });
+    }
+
+    // Ensure a file was actually uploaded and is available in buffer.
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided for upload.',
+      });
+    }
+
+    // const user = await User.findById(requestedUserId);
+    const user = await User.findById(requestedUserId).select(
+      '-password -otp -otpExpiry'
+    );
+
+    if (!user) {
+      // If user not found, and a new image was uploaded, delete it from Cloudinary.
+      // This cleanup is handled in the catch block if `newUploadedImageUrl` is set.
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // 1. If an old profile image exists, delete it from Cloudinary.
+    if (user.profileImage) {
+      const publicId = extractPublicId(user.profileImage);
+      if (publicId) {
+        await deleteCloudinaryImage(publicId).catch((err) =>
+          console.error('Error deleting old Cloudinary profile image:', err)
+        );
+      }
+    }
+
+    // 2. Upload the new profile image buffer to Cloudinary in the 'user_profiles' folder.
+    // The cloudinaryUpload function handles transformations based on the folder.
+    const uploadResult = await cloudinaryUpload(
+      req.file.buffer,
+      'user_profiles'
+    );
+    newUploadedImageUrl = uploadResult.secure_url; // Store for potential cleanup
+
+    // 3. Update the user's profileImage field with the new Cloudinary URL.
+    user.profileImage = newUploadedImageUrl;
+    await user.save(); // Save the updated user document
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image updated successfully',
+      // Use .toObject() to ensure only necessary fields are returned and exclude password/otp
+      data: { user: user },
+    });
+  } catch (error) {
+    // If an error occurs during the process (e.g., Cloudinary upload error, database error),
+    // and a new image was successfully uploaded to Cloudinary (i.e., newUploadedImageUrl is set),
+    // delete it to clean up.
+    if (newUploadedImageUrl) {
+      const publicId = extractPublicId(newUploadedImageUrl);
+      if (publicId) {
+        await deleteCloudinaryImage(publicId).catch((err) =>
+          console.error(
+            'Error deleting new Cloudinary profile image after update failure:',
+            err
+          )
+        );
+      }
+    }
+    next(error); // Pass the error to the Express error handling middleware.
+  }
+};
+
+/**
+ * @desc    Remove a user's profile image
+ * @route   DELETE /api/users/:id/profile-image
+ * @access  Private (User/Admin)
+ */
+export const deleteProfileImage = async (req, res, next) => {
+  try {
+    const requestedUserId = req.params.id;
+    const currentUserId = req.user.id;
+    const currentUserRole = req.user.role;
+
+    // Authorization: User can delete their own profile image or an admin can delete any.
+    if (
+      String(requestedUserId) !== String(currentUserId) &&
+      currentUserRole !== 'admin'
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only remove your own profile image.',
+      });
+    }
+
+    // const user = await User.findById(requestedUserId);
+    const user = await User.findById(requestedUserId).select(
+      '-password -otp -otpExpiry'
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // If a profile image exists, delete it from Cloudinary.
+    if (user.profileImage) {
+      const publicId = extractPublicId(user.profileImage);
+      if (publicId) {
+        await deleteCloudinaryImage(publicId).catch((err) =>
+          console.error(
+            'Error deleting Cloudinary profile image on removal:',
+            err
+          )
+        );
+      }
+      user.profileImage = null; // Set profileImage to null in the database
+      await user.save(); // Save the updated user document
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'No profile image to remove.',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image removed successfully',
+      data: { user: user },
     });
   } catch (error) {
     next(error);

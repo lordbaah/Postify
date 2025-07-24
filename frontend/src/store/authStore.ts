@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import apiInstance from '@/services/api';
 import type {
-  User,
   SignupData,
   SigninData,
   VerifyAccountData,

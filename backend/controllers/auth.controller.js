@@ -469,6 +469,7 @@ export const checkAuth = async (req, res, next) => {
           firstName: user.firstName,
           lastName: user.lastName,
           userName: user.userName,
+          profileImage: user.profileImage,
           email: user.email,
           isVerified: user.isVerified,
           role: user.role,

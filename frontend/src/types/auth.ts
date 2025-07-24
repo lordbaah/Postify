@@ -7,6 +7,7 @@ export interface User {
   lastName: string;
   userName: string;
   email: string;
+  profileImage: string | null;
   isVerified: boolean;
   role: 'user' | 'admin';
   // Add other fields if your user object has more properties

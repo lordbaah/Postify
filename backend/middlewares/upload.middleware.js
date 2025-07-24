@@ -1,36 +1,39 @@
-import multer from 'multer';
-// No need for 'path' or 'fs' when using memoryStorage for Cloudinary uploads
+import multer from 'multer'; // Import Multer directly
 
-// Configure storage for Multer to use memoryStorage.
-// This means the file will be stored in memory as a Buffer,
-// which is then passed directly to Cloudinary for upload.
-const storage = multer.memoryStorage();
+// File filter function to validate image types
+const imageFileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ];
 
-// Filter to allow only specific image file types
-const fileFilter = (req, file, cb) => {
-  // Check the mimetype of the uploaded file.
-  // Only allow JPEG, JPG, PNG, and GIF images.
-  if (
-    file.mimetype === 'image/jpeg' ||
-    file.mimetype === 'image/jpg' ||
-    file.mimetype === 'image/png' ||
-    file.mimetype === 'image/gif'
-  ) {
-    cb(null, true); // Accept the file (pass `true` to the callback)
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true); // Accept the file
   } else {
-    // Reject the file if it's not an allowed image type.
-    // Pass an Error object to the callback to indicate rejection.
-    cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'), false);
+    // Reject the file with an error message
+    cb(new Error('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
   }
 };
 
-// Initialize Multer upload middleware with the configured storage and file filter
-const upload = multer({
-  storage: storage, // Use memoryStorage for Cloudinary uploads
-  fileFilter: fileFilter, // Apply the file type filter
+// Multer configuration for post images
+// Using memoryStorage to store the file buffer in memory before sending to Cloudinary.
+export const uploadPostImage = multer({
+  storage: multer.memoryStorage(), // Store file in memory as a buffer
+  fileFilter: imageFileFilter, // Apply the image type filter
   limits: {
-    fileSize: 5 * 1024 * 1024, // Limit file size to 5MB (5 * 1024 * 1024 bytes)
+    fileSize: 10 * 1024 * 1024, // 10MB limit for post images
   },
 });
 
-export default upload;
+// Multer configuration for profile images
+// Using memoryStorage to store the file buffer in memory before sending to Cloudinary.
+export const uploadProfileImage = multer({
+  storage: multer.memoryStorage(), // Store file in memory as a buffer
+  fileFilter: imageFileFilter, // Apply the image type filter
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit for profile images
+  },
+});

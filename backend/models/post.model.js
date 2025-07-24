@@ -6,7 +6,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Post title is required'],
       trim: true,
-      minlength: 2,
+      minlength: 5,
       maxlength: 50,
     },
 
@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Post content is required'],
       trim: true,
-      minlength: 2,
+      minlength: 20,
       maxlength: 5000,
     },
 

@@ -13,7 +13,8 @@ const categorySchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-      maxLength: 255,
+      maxLength: 300,
+      default: null,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

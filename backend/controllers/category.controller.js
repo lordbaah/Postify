@@ -5,6 +5,7 @@ import Post from '../models/post.model.js';
 export const createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
+    const userId = req.user?.id || req.userId;
 
     if (!name) {
       return res.status(422).json({
