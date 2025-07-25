@@ -50,7 +50,7 @@ export interface BlogPost {
 // Request data types
 export interface CreateBlogPostData {
   title: string;
-  image?: string;
+  image?: File;
   content: string;
   category: string; // Category ID as string
 }

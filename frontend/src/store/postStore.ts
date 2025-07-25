@@ -23,11 +23,23 @@ export const usePostStore = create<PostState>((set) => ({
   clearMessages: () => set({ error: null, success: null }),
 
   createBlogPost: async (
-    data: CreateBlogPostData
+    data: FormData | CreateBlogPostData
   ): Promise<OperationResult> => {
     set({ isLoading: true, error: null, success: null });
     try {
-      const response = await apiInstance.post<ApiResponse>('/blog/posts', data);
+      const config =
+        data instanceof FormData
+          ? {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          : {};
+      const response = await apiInstance.post<ApiResponse>(
+        '/blog/posts',
+        data,
+        config
+      );
       console.log(response);
       set({ success: response.data.message, isLoading: false });
       return { success: true, message: response.data.message };

@@ -1,9 +1,16 @@
 // src/pages/Dashboard/UserProfilePage.tsx
 
-import { useAuthStore } from '@/store/authStore';
+// import { useAuthStore } from '@/store/authStore';
+import { useEffect } from 'react';
+import { useUserStore } from '@/store/userStore';
 
 const UserProfilePage = () => {
-  const { user } = useAuthStore();
+  // const { user } = useAuthStore();
+  const { user, getUserProfile } = useUserStore();
+
+  useEffect(() => {
+    getUserProfile();
+  }, []);
 
   return (
     <div className="p-6">

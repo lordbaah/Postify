@@ -10,11 +10,31 @@ import {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select('-password -otp -otpExpiry');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const users = await User.find()
+      .select('-password -otp -otpExpiry')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    res
-      .status(200)
-      .json({ success: true, message: 'Here are list of users', data: users });
+    const totalUsers = await User.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      message: 'Here are list of users',
+      data: {
+        users,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalUsers / limit),
+          totalUsers,
+          hasNextPage: page < Math.ceil(totalUsers / limit),
+          hasPrevPage: page > 1,
+        },
+      },
+    });
   } catch (error) {
     next(error);
   }

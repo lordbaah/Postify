@@ -7,7 +7,7 @@ const postSchema = new mongoose.Schema(
       required: [true, 'Post title is required'],
       trim: true,
       minlength: 5,
-      maxlength: 50,
+      maxlength: 200,
     },
 
     image: {
@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema(
       required: [true, 'Post content is required'],
       trim: true,
       minlength: 20,
-      maxlength: 5000,
+      maxlength: 1000,
     },
 
     category: {

@@ -1,6 +1,16 @@
 // src/pages/Dashboard/UserMyPostsPage.tsx
+import { useEffect } from 'react';
+import { useUserStore } from '@/store/userStore';
 
 const UserMyPostsPage = () => {
+  const { userPosts, getUserPosts } = useUserStore();
+
+  useEffect(() => {
+    getUserPosts();
+  }, []);
+
+  console.log(userPosts);
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-primary-dark mb-4">My Posts</h1>

@@ -34,15 +34,13 @@ import type { Category } from '@/types/category';
 const categorySchema = z.object({
   name: z
     .string()
-    .min(1, 'Category name is required')
     .min(2, 'Category name must be at least 2 characters')
-    .max(100, 'Category name must be less than 100 characters')
+    .max(50, 'Category name must be less than 100 characters')
     .trim(),
   description: z
     .string()
-    .min(1, 'Category description is required')
     .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description must be less than 500 characters')
+    .max(200, 'Description must be less than 500 characters')
     .trim(),
 });
 
@@ -93,7 +91,7 @@ const AdminCategoryManagementPage = () => {
   }, [success, error, clearMessages]);
 
   // Form submit handler
-  const onSubmit = async (data: CategoryFormData) => {
+  const handleCreateCategory = async (data: CategoryFormData) => {
     try {
       const results = await createCategory({
         name: data.name,
@@ -183,15 +181,15 @@ const AdminCategoryManagementPage = () => {
       </div>
 
       {/* Create Category Form */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-4">
-          <PlusIcon className="w-5 h-5" />
-          Create New Category
-        </h2>
+      <div className="">
+        <h2 className="">Create New Category</h2>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={form.handleSubmit(handleCreateCategory)}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="name"

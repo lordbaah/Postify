@@ -13,6 +13,9 @@ const BlogDetailPage = () => {
     }
   }, [id]);
 
+  console.log(currentPost);
+  console.log(currentPostComments);
+
   return (
     <div>
       <h1>Blog Detail Page</h1>

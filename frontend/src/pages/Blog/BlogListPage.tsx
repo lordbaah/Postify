@@ -11,7 +11,7 @@ const BlogListPage = () => {
   useAuthToast();
 
   useEffect(() => {
-    getAllBlogPosts();
+    getAllBlogPosts(1, 20);
   }, []);
 
   console.log(blogPosts);
