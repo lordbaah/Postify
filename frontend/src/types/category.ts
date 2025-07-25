@@ -4,17 +4,20 @@
 export interface Category {
   _id: string;
   name: string;
+  description?: string;
   // Add other fields if your category object has more properties
 }
 
 // Request data types
 export interface CreateCategoryData {
   name: string;
+  description?: string;
   // Add other fields required for creating a category
 }
 
 export interface EditCategoryData {
   name?: string;
+  description?: string;
   // Add other fields that can be edited (all optional)
 }
 

@@ -82,8 +82,9 @@ export const updateCategory = async (req, res, next) => {
       });
     }
 
-    // Check if another category with the same name exists
-    const existingCategory = await Category.findOne({ name });
+    // const existingCategory = await Category.findOne({ name });
+    // Check if another category with the same name exists (excluding current)
+    const existingCategory = await Category.findOne({ name, _id: { $ne: id } });
     if (existingCategory) {
       return res.status(409).json({
         success: false,

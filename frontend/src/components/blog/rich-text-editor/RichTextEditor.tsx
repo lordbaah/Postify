@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import MenuBar from './MenuBar';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import { BulletList, OrderedList, ListItem } from '@tiptap/extension-list';
+import { BulletList, OrderedList } from '@tiptap/extension-list';
 
 // define your extension array
 const extensions = [
@@ -51,7 +51,7 @@ const RichTextEditor = ({ onChange }: RichTextEditorProps) => {
   });
 
   return (
-    <div>
+    <div className="overflow-y-hidden w-full">
       RichTextEditor
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
