@@ -70,7 +70,7 @@ const UserNewPostPage = () => {
 
   // console.log(categories.map((cat) => cat.name));
 
-  const { isLoading, createBlogPost } = usePostStore();
+  const { isLoading, createBlogPost, success, error } = usePostStore();
 
   // function onSubmit(BlogPostData: any) {
   //   console.log(BlogPostData);
@@ -212,7 +212,9 @@ const UserNewPostPage = () => {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button disabled={isLoading} type="submit">
+            {isLoading ? 'Create Post' : 'Creating Post....'}
+          </Button>
         </form>
       </Form>
     </div>

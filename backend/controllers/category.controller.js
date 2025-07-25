@@ -155,7 +155,7 @@ export const deleteCategory = async (req, res, next) => {
     if (postCount > 0) {
       return res.status(400).json({
         success: false,
-        message: `Cannot delete category: It is referenced by ${postCount} post(s).`,
+        message: `Cannot delete category: ${category.name} It has ${postCount} post(s).`,
       });
     }
 

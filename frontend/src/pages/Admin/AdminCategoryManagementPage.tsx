@@ -64,6 +64,8 @@ const AdminCategoryManagementPage = () => {
     categories,
     isLoading,
     error,
+    success,
+    clearMessages,
   } = useCategoryStore();
 
   // React Hook Form setup
@@ -79,6 +81,17 @@ const AdminCategoryManagementPage = () => {
     getAllBlogCategory();
   }, [getAllBlogCategory]);
 
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      clearMessages(); // Clear immediately after showing
+    }
+    if (error) {
+      toast.error(error);
+      clearMessages(); // Clear immediately after showing
+    }
+  }, [success, error, clearMessages]);
+
   // Form submit handler
   const onSubmit = async (data: CategoryFormData) => {
     try {
@@ -90,11 +103,7 @@ const AdminCategoryManagementPage = () => {
       // Reset form on success
       if (results.success) {
         form.reset();
-        toast.success(results.message);
-      }
-
-      if (error) {
-        toast.error(error);
+        // toast.success(results.message);
       }
 
       // Refresh categories list
@@ -122,9 +131,6 @@ const AdminCategoryManagementPage = () => {
         );
       }
 
-      if (error) {
-        toast.error(error);
-      }
       await getAllBlogCategory();
       setDeleteDialogOpen(false);
       setSelectedCategory(null);
