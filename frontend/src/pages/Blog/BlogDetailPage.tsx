@@ -1,51 +1,38 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePostStore } from '@/store/postStore';
+import usePageTitle from '@/hooks/usePageTitle';
 
-const BlogDetailPage = () => {
+import ErrorAlert from '@/components/blog/ErrorAlert';
+import LoadingSkeleton from '@/components/blog/LoadingSkeleton';
+import PostHeader from '@/components/blog/PostHeader';
+import PostCoverImage from '@/components/blog/PostCoverImage';
+import PostContent from '@/components/blog/PostContent';
+import CommentsSection from '@/components/blog/CommentsSection';
+
+export default function BlogDetailPage() {
   const { id } = useParams();
   const { getSinglePost, currentPost, currentPostComments, isLoading, error } =
     usePostStore();
 
   useEffect(() => {
-    if (id) {
-      getSinglePost(id);
-    }
+    if (id) getSinglePost(id);
   }, [id]);
 
-  console.log(currentPost);
-  console.log(currentPostComments);
+  usePageTitle(currentPost?.title);
+
+  if (error) return <ErrorAlert message={error} />;
+  if (isLoading) return <LoadingSkeleton />;
+  if (!currentPost) return <ErrorAlert message="Blog post not found." />;
 
   return (
-    <div>
-      <h1>Blog Detail Page</h1>
-
-      {isLoading && <h2>Loading...</h2>}
-
-      {error && <p className="text-red-500">{error}</p>}
-
-      {currentPost && (
-        <>
-          <h2>{currentPost.title}</h2>
-          <p>Post made by {currentPost.author.firstName}</p>
-          <p>{currentPost.content}</p>
-        </>
-      )}
-
-      <section>
-        <h3>Comments</h3>
-        {currentPostComments?.length > 0 ? (
-          currentPostComments.map((comment) => (
-            <div key={comment._id}>
-              <p>{comment.text}</p>
-            </div>
-          ))
-        ) : (
-          <p>No comments</p>
-        )}
-      </section>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <article className="space-y-8">
+        <PostHeader post={currentPost} />
+        <PostCoverImage post={currentPost} />
+        <PostContent content={currentPost.content} />
+        <CommentsSection comments={currentPostComments} />
+      </article>
     </div>
   );
-};
-
-export default BlogDetailPage;
+}

@@ -1,38 +1,105 @@
-// src/pages/Dashboard/UserProfilePage.tsx
-
-// import { useAuthStore } from '@/store/authStore';
 import { useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, User, Mail, Briefcase } from 'lucide-react';
 
-const UserProfilePage = () => {
-  // const { user } = useAuthStore();
-  const { user, getUserProfile } = useUserStore();
+export default function UserProfilePage() {
+  const { user, getUserProfile, isLoading, error } = useUserStore();
 
   useEffect(() => {
     getUserProfile();
   }, []);
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-primary-dark mb-4">
-        User Profile
-      </h1>
-      <p className="text-lg text-gray-700">
-        Welcome to your profile,{' '}
-        <span className="font-semibold">{user?.userName || 'User'}</span>!
-      </p>
-      <p className="mt-2 text-gray-600">
-        Email: <span className="font-medium">{user?.email || 'N/A'}</span>
-      </p>
-      <p className="mt-2 text-gray-600">
-        Your role:{' '}
-        <span className="font-medium text-primary-DEFAULT">{user?.role}</span>
-      </p>
-      <p className="mt-4 text-gray-600">
-        This is a protected route, accessible only to logged-in users.
-      </p>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="mb-8">
+        <h1 className=" mb-2">User Profile</h1>
+        <p className="text-muted-foreground">
+          View and manage your personal profile information.
+        </p>
+        <p className="text-muted-foreground mt-2">
+          This is a protected route, accessible only to logged-in users.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <Card>
+          <CardHeader className="flex flex-col items-center gap-4 pb-6">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+      ) : user ? (
+        <Card>
+          <CardHeader className="flex flex-col items-center gap-4 pb-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage
+                src={user.profileImage || '/placeholder.svg'}
+                alt={`${user.userName}'s profile picture`}
+              />
+              <AvatarFallback className="text-4xl">
+                <User className="h-12 w-12" />
+              </AvatarFallback>
+            </Avatar>
+            <CardTitle className="text-2xl font-semibold">
+              {user.userName}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3 text-lg text-muted-foreground">
+              <Mail className="h-5 w-5 text-primary" />
+              <p>
+                Email:{' '}
+                <span className="font-medium text-foreground">
+                  {user.email || 'N/A'}
+                </span>
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-lg text-muted-foreground">
+              <Briefcase className="h-5 w-5 text-primary" />
+              <p>
+                Role:{' '}
+                <span className="font-medium text-foreground">
+                  {user.role || 'N/A'}
+                </span>
+              </p>
+            </div>
+            {/* {user.bio && (
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">About Me</h3>
+                <p className="text-muted-foreground">{user.bio}</p>
+              </div>
+            )} */}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">User profile not found.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
-};
-
-export default UserProfilePage;
+}

@@ -1,4 +1,12 @@
 import { Link } from 'react-router-dom';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ImageIcon } from 'lucide-react';
 export interface Category {
   _id: string;
   name: string;
@@ -8,40 +16,58 @@ interface cardContentProps {
   _id: string;
   title: string;
   blogCategory: string;
+  image?: string;
 }
-const BlogCard = ({ _id, title, blogCategory }: cardContentProps) => {
+const BlogCard = ({ _id, title, blogCategory, image }: cardContentProps) => {
   return (
-    <article className="rounded-lg border border-gray-100 bg-white shadow-xs">
-      <img
-        alt=""
-        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-        className="h-56 w-full object-cover"
-      />
-      <h1 className="text-lg font-medium text-gray-900">{title}</h1>
-
-      <div className="mt-4 flex flex-wrap gap-1">
-        <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs whitespace-nowrap text-purple-600">
-          {blogCategory || ''}
-        </span>
-
-        <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs whitespace-nowrap text-purple-600">
-          JavaScript
-        </span>
+    <Card className="pt-0">
+      {/* Image Section */}
+      <div className="relative h-56 w-full bg-muted">
+        {image ? (
+          <img
+            alt={title}
+            src={image}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full bg-muted">
+            <div className="text-center text-muted-foreground">
+              <ImageIcon className="h-12 w-12 mx-auto mb-2" />
+              <p className="text-sm">No image available</p>
+            </div>
+          </div>
+        )}
       </div>
+      <CardHeader className="pb-3">
+        <h3 className="text-lg font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+          {title}
+        </h3>
+      </CardHeader>
 
-      <Link
-        to={`/blogs/${_id}`}
-        className="group mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600"
-      >
-        Find out more
-        <span
-          aria-hidden="true"
-          className="block transition-all group-hover:ms-0.5 rtl:rotate-180"
+      <CardContent>
+        <Badge
+          variant="secondary"
+          className="bg-purple-100 text-purple-600 hover:bg-purple-200"
         >
-          &rarr;
-        </span>
-      </Link>
-    </article>
+          {blogCategory || 'General'}
+        </Badge>
+      </CardContent>
+
+      <CardFooter className="pt-0">
+        <Link
+          to={`/blogs/${_id}`}
+          className="group/link inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          Find out more
+          <span
+            aria-hidden="true"
+            className="block transition-all group-hover/link:translate-x-0.5"
+          >
+            →
+          </span>
+        </Link>
+      </CardFooter>
+    </Card>
   );
 };
 

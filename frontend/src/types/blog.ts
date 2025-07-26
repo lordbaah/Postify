@@ -6,6 +6,7 @@ export interface Author {
   firstName: string;
   lastName: string;
   userName: string;
+  profileImge: string | null;
 }
 
 // Category type based on your API response
@@ -16,6 +17,8 @@ export interface Category {
 
 // Comment type based on your API response
 export interface Comment {
+  // author: Author;
+  createdAt: string | number | Date;
   _id: string;
   post: string; // Post ID
   user: Author;

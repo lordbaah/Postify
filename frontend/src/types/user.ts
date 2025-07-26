@@ -1,4 +1,4 @@
-// types/user.ts
+import type { Category, Author } from './blog';
 
 // Basic User type (adjust properties based on your actual backend user schema)
 export interface User {
@@ -51,7 +51,14 @@ export interface AllUsersResponse {
 export interface UserBlogPost {
   _id: string;
   title: string;
-  // ... other minimal post fields needed for display in user context
+  image: string | null;
+  content: string;
+  category: Category | null;
+  author: Author;
+  published_at: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface UserComment {

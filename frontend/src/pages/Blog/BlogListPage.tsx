@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import usePageTitle from '@/hooks/usePageTitle';
 import BlogCard from '@/components/blog/BlogCard';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePostStore } from '@/store/postStore';
 import { useAuthToast } from '@/hooks/useAuthToast';
 
@@ -31,18 +32,45 @@ const BlogListPage = () => {
   // getAllBlogPosts(1, 10, 'Technology');
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {isLoading && <h1>loading....</h1>}
-      {error && <h1 className="text-red-500">{error}</h1>}
-      {blogPosts.map((post) => (
-        <BlogCard
-          key={post._id}
-          _id={post._id}
-          title={post.title}
-          // blogCategory={post.category.name}
-          blogCategory={post.category?.name || 'General'}
-        />
-      ))}
+    <div className="">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold tracking-tight">Blog</h1>
+        <p className="text-muted-foreground mt-2">
+          Discover our latest articles and insights
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-48 w-full rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogPosts.map((post) => (
+            <BlogCard
+              key={post._id}
+              _id={post._id}
+              title={post.title}
+              blogCategory={post.category?.name || 'General'}
+              image={post.image}
+            />
+          ))}
+        </div>
+      )}
+
+      {blogPosts.length === 0 && !isLoading && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No blog posts found.</p>
+        </div>
+      )}
     </div>
   );
 };
