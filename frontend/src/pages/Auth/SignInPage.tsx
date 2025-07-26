@@ -103,8 +103,8 @@ const SignInPage = () => {
 
       {/* Links */}
       <div className="mt-4 flex justify-between text-sm">
-        <Link to="/signin" className="text-blue-500 hover:underline">
-          Have an Account?
+        <Link to="/signup" className="text-blue-500 hover:underline">
+          Don't Have an Account?
         </Link>
         <Link to="/forgot-password" className="text-blue-500 hover:underline">
           Forgot Password?

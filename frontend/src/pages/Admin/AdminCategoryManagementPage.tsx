@@ -26,8 +26,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import DeleteDialogForm from '@/components/common/DeleteDialogForm';
-import EditDialogForm from '@/components/common/EditDialogForm';
+import DeleteDialogForm from '@/components/admin/DeleteDialogForm';
+import EditDialogForm from '@/components/admin/EditDialogForm';
 import type { Category } from '@/types/category';
 
 // Zod schema for category validation

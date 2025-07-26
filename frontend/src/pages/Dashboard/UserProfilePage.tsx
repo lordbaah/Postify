@@ -53,7 +53,7 @@ export default function UserProfilePage() {
           <CardHeader className="flex flex-col items-center gap-4 pb-6">
             <Avatar className="h-24 w-24">
               <AvatarImage
-                src={user.profileImage || '/placeholder.svg'}
+                src={user.profileImage}
                 alt={`${user.userName}'s profile picture`}
               />
               <AvatarFallback className="text-4xl">
@@ -78,9 +78,7 @@ export default function UserProfilePage() {
               <Briefcase className="h-5 w-5 text-primary" />
               <p>
                 Role:{' '}
-                <span className="font-medium text-foreground">
-                  {user.role || 'N/A'}
-                </span>
+                <span className="font-medium text-foreground">{user.role}</span>
               </p>
             </div>
             {/* {user.bio && (

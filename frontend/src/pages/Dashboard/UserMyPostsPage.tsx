@@ -1,14 +1,30 @@
 import { useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePostStore } from '@/store/postStore';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Calendar, User, ImageIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  User,
+  ImageIcon,
+  TrashIcon,
+  EditIcon,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const UserMyPostsPage = () => {
   const { userPosts, getUserPosts, error, isLoading } = useUserStore();
+  const { deleteBlogPost } = usePostStore();
 
   useEffect(() => {
     getUserPosts();
@@ -60,7 +76,7 @@ const UserMyPostsPage = () => {
       ) : userPosts && userPosts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {userPosts.map((post) => (
-            <Card key={post._id} className="overflow-hidden">
+            <Card key={post._id} className="overflow-hidden pt-0">
               <div className="relative h-48 w-full bg-muted">
                 {post.image ? (
                   <img
@@ -79,12 +95,7 @@ const UserMyPostsPage = () => {
               </div>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg line-clamp-2">
-                  <Link
-                    to={`/blogs/${post._id}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {post.title}
-                  </Link>
+                  {post.title}
                 </CardTitle>
 
                 <Badge
@@ -113,7 +124,29 @@ const UserMyPostsPage = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Delete Post"
+                    variant="destructive"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" className="h-8 w-8 p-0" title="Edit Post">
+                    <EditIcon className="w-4 h-4" />
+                  </Button>
+                </div>
               </CardContent>
+              <CardFooter>
+                <Link
+                  to={`/blogs/${post._id}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  View Post
+                </Link>
+              </CardFooter>
             </Card>
           ))}
         </div>

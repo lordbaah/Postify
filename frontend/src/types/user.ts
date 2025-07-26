@@ -62,6 +62,8 @@ export interface UserBlogPost {
 }
 
 export interface UserComment {
+  created_at: string;
+  post: UserBlogPost;
   _id: string;
   text: string;
   // ... other minimal comment fields needed for display in user context
