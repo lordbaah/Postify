@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import CommentCard from './CommentCard';
@@ -8,18 +9,28 @@ interface PostCommentProps {
 }
 
 const CommentsSection = ({ comments }: PostCommentProps) => {
+  const [commentList, setCommentList] = useState<Comment[]>(comments);
+
+  const handleDeleteComment = (commentId: string) => {
+    setCommentList((prev) =>
+      prev.filter((comment) => comment._id !== commentId)
+    );
+  };
+
   return (
     <>
       <Separator />
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Comments ({comments?.length || 0})
-        </h2>
+        <h2 className="">Comments ({commentList.length})</h2>
 
-        {comments && comments.length > 0 ? (
+        {commentList.length > 0 ? (
           <div className="space-y-4">
-            {comments.map((comment) => (
-              <CommentCard key={comment._id} comment={comment} />
+            {commentList.map((comment) => (
+              <CommentCard
+                key={comment._id}
+                comment={comment}
+                onDelete={handleDeleteComment}
+              />
             ))}
           </div>
         ) : (

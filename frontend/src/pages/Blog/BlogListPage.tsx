@@ -15,8 +15,8 @@ const BlogListPage = () => {
     getAllBlogPosts(1, 20);
   }, []);
 
-  console.log(blogPosts);
-  console.log(pagination);
+  // console.log(blogPosts);
+  // console.log(pagination);
 
   // // Get all posts
   // getAllBlogPosts();

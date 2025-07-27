@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
+import { toast } from 'react-toastify';
 import z from 'zod';
 import {
   Form,
@@ -33,21 +34,15 @@ interface BlogCommentProps {
 const BlogComment = ({ postId }: BlogCommentProps) => {
   const {
     createComment,
-    editComment,
     deleteComment,
-    isLoading,
+    isLoading: IscommmentLoading,
     error,
     success,
     clearMessages,
   } = useCommentStore();
 
-  // const { getSinglePost, currentPost, currentPostComments } = usePostStore();
+  const { getSinglePost, currentPostComments } = usePostStore();
 
-  // useEffect(() => {
-  //   if (postId) getSinglePost(postId);
-  // }, [postId]);
-
-  // const form = useForm();
   const form = useForm<CommentFormData>({
     resolver: zodResolver(commentSchema),
     defaultValues: {
@@ -56,16 +51,26 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
   });
 
   const handleCreateComment = async (data: CommentFormData) => {
-    console.log(data.text, postId);
+    // console.log(data.text, postId);
 
     const result = await createComment(postId, data);
     if (result.success) {
-      console.log(result.success);
-    }
-    if (error) {
-      console.log(error);
+      form.reset();
+      // console.log(` ${result.success} ${result.message}`);
+      getSinglePost(postId);
     }
   };
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      clearMessages(); // Clear immediately after showing
+    }
+    if (error) {
+      toast.error(error);
+      clearMessages(); // Clear immediately after showing
+    }
+  }, [success, error, clearMessages]);
 
   // const handleEditComment = async (data) => {
   //   const result = await editComment(data, postId);
@@ -74,15 +79,9 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
   //   }
   // };
 
-  // const handleDeleteComment = async () => {
-  //   await deleteComment(postId);
-  // };
-
   return (
-    <div className="mt-8 p-4 border rounded-lg shadow-sm bg-white">
-      <p className="mb-4 text-lg font-semibold text-gray-800">
-        Have a thought? Share your comment:
-      </p>
+    <div className="mt-8 p-4 border rounded-lg shadow-sm">
+      <h2 className="mb-4">Have a thought? Share your comment:</h2>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCreateComment)}
@@ -106,8 +105,12 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full sm:w-auto">
-            Post Comment
+          <Button
+            disabled={IscommmentLoading}
+            type="submit"
+            className="w-full sm:w-auto"
+          >
+            {IscommmentLoading ? 'Posting Comment...' : 'Share comment'}
           </Button>
         </form>
       </Form>

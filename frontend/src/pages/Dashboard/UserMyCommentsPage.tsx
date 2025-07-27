@@ -1,20 +1,33 @@
 import { useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
+import { useCommentStore } from '@/store/commentStore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertCircle, Calendar, User, ExternalLink } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
 const UserMyCommentsPage = () => {
   const { getUserComments, userComments, error, isLoading } = useUserStore();
+  const { deleteComment } = useCommentStore();
 
   useEffect(() => {
     getUserComments();
   }, []);
 
   console.log(userComments);
+
+  const handleCommentDelete = async (commentId: string) => {
+    const result = await deleteComment(commentId);
+
+    if (result.success) {
+      toast.success(result.message);
+    }
+    getUserComments();
+  };
 
   if (error) {
     return (
@@ -93,6 +106,14 @@ const UserMyCommentsPage = () => {
                     </div>
                   </div>
                 </div>
+
+                <Button
+                  onClick={() => handleCommentDelete(comment._id)}
+                  size="sm"
+                  variant="destructive"
+                >
+                  delete comment
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/50 rounded-lg p-4">

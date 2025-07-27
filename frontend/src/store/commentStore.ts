@@ -1,13 +1,12 @@
-// stores/useCommentStore.ts
 import { create } from 'zustand';
-import apiInstance from '@/services/api'; // Assuming this is your Axios instance
-import type { ApiResponse, OperationResult } from '@/types/blog'; // Generic types still imported from blog.ts
+import apiInstance from '@/services/api';
+import type { ApiResponse, OperationResult } from '@/types/blog';
 import type {
   Comment,
   CreateCommentData,
   EditCommentData,
   CommentState,
-} from '@/types/comment'; // All comment-specific types from the new file
+} from '@/types/comment';
 
 export const useCommentStore = create<CommentState>((set) => ({
   // Initial states
@@ -18,12 +17,7 @@ export const useCommentStore = create<CommentState>((set) => ({
   // Action to clear success/error messages
   clearMessages: () => set({ error: null, success: null }),
 
-  /**
-   * Posts a new comment on a specific blog post.
-   * @param postId The ID of the post to comment on.
-   * @param data The comment data (e.g., text).
-   * @returns An OperationResult indicating success or failure.
-   */
+  //Posts a new comment on a specific blog post
   createComment: async (
     postId: string,
     data: CreateCommentData
@@ -34,6 +28,7 @@ export const useCommentStore = create<CommentState>((set) => ({
         `/blog/posts/${postId}/comments`,
         data
       );
+
       set({ success: response.data.message, isLoading: false });
       return { success: true, message: response.data.message };
     } catch (error: any) {
@@ -45,12 +40,7 @@ export const useCommentStore = create<CommentState>((set) => ({
     }
   },
 
-  /**
-   * Edits an existing comment.
-   * @param commentId The ID of the comment to edit.
-   * @param data The updated comment data (e.g., text).
-   * @returns An OperationResult indicating success or failure.
-   */
+  //Edits an existing comment.
   editComment: async (
     commentId: string,
     data: EditCommentData
@@ -72,11 +62,7 @@ export const useCommentStore = create<CommentState>((set) => ({
     }
   },
 
-  /**
-   * Deletes a comment.
-   * @param commentId The ID of the comment to delete.
-   * @returns An OperationResult indicating success or failure.
-   */
+  //Deletes a comment.
   deleteComment: async (commentId: string): Promise<OperationResult> => {
     set({ isLoading: true, error: null, success: null });
     try {
