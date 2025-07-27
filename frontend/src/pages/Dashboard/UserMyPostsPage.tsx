@@ -19,6 +19,7 @@ import {
   TrashIcon,
   EditIcon,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -42,6 +43,19 @@ const UserMyPostsPage = () => {
       </div>
     );
   }
+
+  const handleDeleteBlogPost = async (postId: string) => {
+    alert('deleting');
+    try {
+      const result = await deleteBlogPost(postId);
+      if (result.success) {
+      }
+
+      await getUserPosts();
+    } catch (error) {
+      console.error('Delete Post error:', error);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -131,11 +145,14 @@ const UserMyPostsPage = () => {
                     className="h-8 w-8 p-0"
                     title="Delete Post"
                     variant="destructive"
+                    onClick={() => handleDeleteBlogPost(post._id)}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </Button>
                   <Button size="sm" className="h-8 w-8 p-0" title="Edit Post">
-                    <EditIcon className="w-4 h-4" />
+                    <Link to={`/dashboard/edit-post/${post._id}`}>
+                      <EditIcon className="w-4 h-4" />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

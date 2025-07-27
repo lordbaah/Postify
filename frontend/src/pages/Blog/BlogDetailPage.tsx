@@ -9,6 +9,7 @@ import PostHeader from '@/components/blog/PostHeader';
 import PostCoverImage from '@/components/blog/PostCoverImage';
 import PostContent from '@/components/blog/PostContent';
 import CommentsSection from '@/components/blog/CommentsSection';
+import BlogComment from '@/components/blog/BlogComment';
 
 export default function BlogDetailPage() {
   const { id } = useParams();
@@ -31,6 +32,7 @@ export default function BlogDetailPage() {
         <PostHeader post={currentPost} />
         <PostCoverImage post={currentPost} />
         <PostContent content={currentPost.content} />
+        <BlogComment postId={currentPost._id} />
         <CommentsSection comments={currentPostComments} />
       </article>
     </div>

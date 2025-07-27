@@ -35,6 +35,7 @@ export const usePostStore = create<PostState>((set) => ({
               },
             }
           : {};
+
       const response = await apiInstance.post<ApiResponse>(
         '/blog/posts',
         data,
@@ -111,13 +112,23 @@ export const usePostStore = create<PostState>((set) => ({
 
   editBlogPost: async (
     id: string,
-    data: EditBlogPostData
+    data: EditBlogPostData | FormData
   ): Promise<OperationResult> => {
     set({ isLoading: true, error: null, success: null });
     try {
+      const config =
+        data instanceof FormData
+          ? {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          : {};
+
       const response = await apiInstance.put<ApiResponse>(
         `/blog/posts/${id}`,
-        data
+        data,
+        config
       );
       set({ success: response.data.message, isLoading: false });
       return { success: true, message: response.data.message };

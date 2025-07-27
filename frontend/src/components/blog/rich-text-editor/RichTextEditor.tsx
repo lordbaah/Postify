@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import MenuBar from './MenuBar';
@@ -33,9 +34,9 @@ interface RichTextEditorProps {
   onChange: (content: string) => void;
 }
 
-const content = '';
+// const content = '';
 
-const RichTextEditor = ({ onChange }: RichTextEditorProps) => {
+const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions,
     content: content, // Set the initial content with the provided value
@@ -49,6 +50,13 @@ const RichTextEditor = ({ onChange }: RichTextEditorProps) => {
       onChange(editor.getHTML());
     },
   });
+
+  // Update editor content when content prop changes (for edit mode)
+  useEffect(() => {
+    if (editor && content !== undefined && editor.getHTML() !== content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
 
   return (
     <div className="overflow-y-hidden w-full">

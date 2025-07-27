@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -26,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { useCategoryStore } from '@/store/categoryStore';
 import { usePostStore } from '@/store/postStore';
 
-// Enhanced validation schema
+// Enhanced validation schema (same as create)
 const blogPostSchema = z.object({
   title: z
     .string()
@@ -38,20 +39,15 @@ const blogPostSchema = z.object({
     .string()
     .min(20, { message: 'Content must be at least 20 characters.' })
     .max(50000, { message: 'Content is too long.' }),
-  image: z.any().optional(), // For file input
+  image: z.any().optional(),
 });
 
 type BlogPostData = z.infer<typeof blogPostSchema>;
 
-// Define the expected data structure for your store
-// interface CreateBlogPostData {
-//   title: string;
-//   content: string;
-//   category: string;
-//   image?: File;
-// }
+const UserEditBlogPost = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-const UserNewPostPage = () => {
   const form = useForm<BlogPostData>({
     resolver: zodResolver(blogPostSchema),
     defaultValues: {
@@ -63,6 +59,9 @@ const UserNewPostPage = () => {
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [keepExistingImage, setKeepExistingImage] = useState<boolean>(true);
+  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -70,24 +69,56 @@ const UserNewPostPage = () => {
     categories,
     isLoading: categoriesLoading,
   } = useCategoryStore();
-  const { isLoading, createBlogPost, success, error, clearMessages } =
-    usePostStore();
 
+  const {
+    isLoading,
+    editBlogPost,
+    getSinglePost,
+    currentPost,
+    success,
+    error,
+    clearMessages,
+  } = usePostStore();
+
+  // Load categories
   useEffect(() => {
     getAllBlogCategory();
   }, [getAllBlogCategory]);
 
-  // Handle success and error messages
+  //Load post
+  useEffect(() => {
+    if (id) {
+      getSinglePost(id);
+    }
+  }, [getSinglePost, id]);
+
+  //this is the current post
+  //   console.log(currentPost);
+
+  useEffect(() => {
+    if (currentPost) {
+      form.reset({
+        title: currentPost.title || '',
+        content: currentPost?.content,
+        category: currentPost.category?._id || '',
+      });
+      // Handle existing image...
+    }
+  }, [currentPost, form]);
+
+  //   Handle success and error messages
   useEffect(() => {
     if (success) {
       toast.success(success);
       clearMessages();
+      // Navigate back to posts list or post detail
+      navigate('/dashboard/my-posts');
     }
     if (error) {
       toast.error(error);
       clearMessages();
     }
-  }, [success, error, clearMessages]);
+  }, [success, error, clearMessages, navigate]);
 
   // Clean up image preview URL
   useEffect(() => {
@@ -99,6 +130,11 @@ const UserNewPostPage = () => {
   }, [imagePreview]);
 
   const handlePost = async (data: BlogPostData) => {
+    if (!id) {
+      toast.error('Invalid post ID');
+      return;
+    }
+
     try {
       // Create FormData for file upload
       const formData = new FormData();
@@ -106,25 +142,26 @@ const UserNewPostPage = () => {
       formData.append('content', data.content);
       formData.append('category', data.category);
 
-      // Add image file if selected
+      // Handle image logic
       if (selectedImageFile) {
+        // New image selected
         formData.append('image', selectedImageFile);
+      } else if (keepExistingImage && existingImageUrl) {
+        // Keep existing image (you might need to handle this in your backend)
+        formData.append('keepExistingImage', 'true');
+      } else {
+        // Remove image
+        formData.append('removeImage', 'true');
       }
 
-      const result = await createBlogPost(formData as any);
+      const result = await editBlogPost(id, formData as any);
 
       if (result?.success) {
-        // Reset form and clear image
-        form.reset();
-        setSelectedImageFile(null);
-        setImagePreview(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+        // Success is handled in useEffect
       }
     } catch (error) {
-      console.error('Error creating post:', error);
-      toast.error('Failed to create post. Please try again.');
+      console.error('Error updating post:', error);
+      toast.error('Failed to update post. Please try again.');
     }
   };
 
@@ -161,6 +198,7 @@ const UserNewPostPage = () => {
       }
 
       setSelectedImageFile(file);
+      setKeepExistingImage(false);
 
       // Create preview URL
       if (imagePreview) {
@@ -169,7 +207,7 @@ const UserNewPostPage = () => {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
 
-      toast.success('Image selected successfully!');
+      toast.success('New image selected successfully!');
     } else {
       setSelectedImageFile(null);
       if (imagePreview) {
@@ -181,6 +219,7 @@ const UserNewPostPage = () => {
 
   const removeImage = () => {
     setSelectedImageFile(null);
+    setKeepExistingImage(false);
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
@@ -190,11 +229,32 @@ const UserNewPostPage = () => {
     }
   };
 
+  const restoreExistingImage = () => {
+    setSelectedImageFile(null);
+    setKeepExistingImage(true);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/dashboard/my-posts');
+  };
+
+  // Show loading state while fetching post data
+  //   if (isLoadingPost) {
+  //     return <p>Loading post data...</p>;
+  //   }
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="mb-2">Create New Blog Post</h1>
-        <p className="">Share your thoughts and ideas with the world.</p>
+        <h1 className="mb-2">Edit Blog Post</h1>
+        <p className="">Update your post content and settings.</p>
       </div>
 
       <Form {...form}>
@@ -260,6 +320,73 @@ const UserNewPostPage = () => {
                 <FormLabel>Featured Image</FormLabel>
                 <FormControl>
                   <div className="space-y-4">
+                    {/* Existing Image Display */}
+                    {existingImageUrl &&
+                      keepExistingImage &&
+                      !selectedImageFile && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-600">
+                            Current image:
+                          </p>
+                          <div className="relative inline-block">
+                            <img
+                              src={existingImageUrl}
+                              alt="Current featured image"
+                              className="w-64 h-40 object-cover rounded-lg border"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={removeImage}
+                              className="absolute top-2 right-2"
+                              disabled={isLoading}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                    {/* New Image Preview */}
+                    {imagePreview && selectedImageFile && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">
+                          New image preview:
+                        </p>
+                        <div className="relative inline-block">
+                          <img
+                            src={imagePreview}
+                            alt="New image preview"
+                            className="w-64 h-40 object-cover rounded-lg border"
+                          />
+                          <div className="absolute top-2 right-2 space-x-2">
+                            {existingImageUrl && (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={restoreExistingImage}
+                                disabled={isLoading}
+                              >
+                                Restore
+                              </Button>
+                            )}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={removeImage}
+                              disabled={isLoading}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File Input */}
                     <Input
                       type="file"
                       accept="image/*"
@@ -269,31 +396,15 @@ const UserNewPostPage = () => {
                       className="cursor-pointer"
                     />
 
-                    {/* Image Preview */}
-                    {imagePreview && (
-                      <div className="relative inline-block">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-64 h-40 object-cover rounded-lg border"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={removeImage}
-                          className="absolute top-2 right-2"
-                          disabled={isLoading}
-                        >
-                          Remove
-                        </Button>
-                      </div>
+                    {/* No Image State */}
+                    {!existingImageUrl && !imagePreview && (
+                      <p className="text-sm text-gray-500">No image selected</p>
                     )}
                   </div>
                 </FormControl>
                 <FormDescription>
-                  Upload a featured image (optional). Max size: 5MB. Supported
-                  formats: JPG, PNG, GIF, WebP.
+                  Upload a new featured image or keep the existing one. Max
+                  size: 5MB. Supported formats: JPG, PNG, GIF, WebP.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -308,7 +419,11 @@ const UserNewPostPage = () => {
               <FormItem>
                 <FormLabel>Blog Content *</FormLabel>
                 <FormControl>
-                  <RichTextEditor {...field} content={field.value} />
+                  <RichTextEditor
+                    {...field}
+                    content={field.value}
+                    // key={currentPost?._id}
+                  />
                 </FormControl>
                 <FormDescription>
                   Write your blog post content. Minimum 20 characters required.
@@ -318,26 +433,35 @@ const UserNewPostPage = () => {
             )}
           />
 
-          {/* Submit Button */}
+          {/* Action Buttons */}
           <div className="flex gap-4">
             <Button
               type="submit"
               disabled={isLoading || categoriesLoading}
               className="min-w-[140px]"
             >
-              {isLoading ? 'Creating Post...' : 'Create Post'}
+              {isLoading ? 'Updating Post...' : 'Update Post'}
             </Button>
 
             <Button
               type="button"
               variant="outline"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
               onClick={() => {
                 form.reset();
-                removeImage();
+                restoreExistingImage();
               }}
               disabled={isLoading}
             >
-              Clear Form
+              Reset Changes
             </Button>
           </div>
         </form>
@@ -346,4 +470,4 @@ const UserNewPostPage = () => {
   );
 };
 
-export default UserNewPostPage;
+export default UserEditBlogPost;

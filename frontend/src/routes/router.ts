@@ -22,6 +22,7 @@ import UserProfilePage from '@/pages/Dashboard/UserProfilePage'; // New: User Pr
 import UserMyPostsPage from '@/pages/Dashboard/UserMyPostsPage'; // New: User's Posts
 import UserNewPostPage from '@/pages/Dashboard/UserNewPostPage'; // New: User New Post
 import UserMyCommentsPage from '@/pages/Dashboard/UserMyCommentsPage'; // New: User's Comments
+import UserEditBlogPost from '@/pages/Dashboard/UserEditBlogPost';
 
 import AdminUserManagementPage from '@/pages/Admin/AdminUserManagementPage'; // New: Admin Users
 import AdminCategoryManagementPage from '@/pages/Admin/AdminCategoryManagementPage'; // New: Admin Categories
@@ -100,6 +101,12 @@ export const appRoutes: AppRoute[] = [
   {
     path: '/dashboard/new-post',
     component: UserNewPostPage,
+    isProtected: true,
+    layout: DashboardLayout,
+  },
+  {
+    path: '/dashboard/edit-post/:id',
+    component: UserEditBlogPost,
     isProtected: true,
     layout: DashboardLayout,
   },
