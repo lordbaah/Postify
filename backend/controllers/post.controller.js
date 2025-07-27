@@ -357,11 +357,15 @@ export const deletePost = async (req, res, next) => {
       }
     }
 
+    // Delete all comments associated with this post
+    await Comment.deleteMany({ post: id });
+
+    // Delete the post
     await Post.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,
-      message: 'Post deleted successfully',
+      message: 'Post and associated comments deleted successfully',
     });
   } catch (error) {
     next(error);
