@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { useCommentStore } from '@/store/commentStore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -10,23 +10,37 @@ import { AlertCircle, Calendar, User, ExternalLink } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+
 const UserMyCommentsPage = () => {
   const { getUserComments, userComments, error, isLoading } = useUserStore();
   const { deleteComment } = useCommentStore();
+
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     getUserComments();
   }, []);
 
-  console.log(userComments);
-
-  const handleCommentDelete = async (commentId: string) => {
-    const result = await deleteComment(commentId);
-
+  const handleCommentDelete = async () => {
+    if (!commentToDelete) return;
+    const result = await deleteComment(commentToDelete);
     if (result.success) {
       toast.success(result.message);
+      await getUserComments();
+    } else {
+      toast.error('Failed to delete comment');
     }
-    getUserComments();
+    setIsDialogOpen(false);
+    setCommentToDelete(null);
   };
 
   if (error) {
@@ -108,7 +122,10 @@ const UserMyCommentsPage = () => {
                 </div>
 
                 <Button
-                  onClick={() => handleCommentDelete(comment._id)}
+                  onClick={() => {
+                    setCommentToDelete(comment._id);
+                    setIsDialogOpen(true);
+                  }}
                   size="sm"
                   variant="destructive"
                 >
@@ -134,6 +151,27 @@ const UserMyCommentsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Comment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this comment? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleCommentDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

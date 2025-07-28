@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { usePostStore } from '@/store/postStore';
 import {
@@ -8,6 +8,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -24,6 +34,9 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const UserMyPostsPage = () => {
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const { userPosts, getUserPosts, error, isLoading } = useUserStore();
   const { deleteBlogPost } = usePostStore();
 
@@ -44,16 +57,32 @@ const UserMyPostsPage = () => {
     );
   }
 
-  const handleDeleteBlogPost = async (postId: string) => {
-    alert('deleting');
-    try {
-      const result = await deleteBlogPost(postId);
-      if (result.success) {
-      }
+  // const handleDeleteBlogPost = async (postId: string) => {
+  //   try {
+  //     const result = await deleteBlogPost(postId);
+  //     if (result.success) {
+  //     }
 
+  //     await getUserPosts();
+  //   } catch (error) {
+  //     console.error('Delete Post error:', error);
+  //   }
+  // };
+
+  const handleDeleteBlogPost = async () => {
+    if (!postToDelete) return;
+    try {
+      const result = await deleteBlogPost(postToDelete);
+      if (result.success) {
+        toast.success('Post deleted successfully');
+      }
       await getUserPosts();
     } catch (error) {
       console.error('Delete Post error:', error);
+      toast.error('Failed to delete post');
+    } finally {
+      setPostToDelete(null);
+      setIsDialogOpen(false);
     }
   };
 
@@ -145,7 +174,10 @@ const UserMyPostsPage = () => {
                     className="h-8 w-8 p-0"
                     title="Delete Post"
                     variant="destructive"
-                    onClick={() => handleDeleteBlogPost(post._id)}
+                    onClick={() => {
+                      setPostToDelete(post._id);
+                      setIsDialogOpen(true);
+                    }}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </Button>
@@ -178,6 +210,26 @@ const UserMyPostsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBlogPost}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

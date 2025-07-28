@@ -27,12 +27,9 @@ export default function UserProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="mb-8">
-        <h1 className=" mb-2">User Profile</h1>
+        <h1 className="mb-2">User Profile</h1>
         <p className="text-muted-foreground">
           View and manage your personal profile information.
-        </p>
-        <p className="text-muted-foreground mt-2">
-          This is a protected route, accessible only to logged-in users.
         </p>
       </div>
 
@@ -65,12 +62,18 @@ export default function UserProfilePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <h2>
+                Welocome to your Profile {user.firstName} {user.lastName}
+              </h2>
+            </div>
+
             <div className="flex items-center gap-3 text-lg text-muted-foreground">
               <Mail className="h-5 w-5 text-primary" />
               <p>
                 Email:{' '}
                 <span className="font-medium text-foreground">
-                  {user.email || 'N/A'}
+                  {user.email}
                 </span>
               </p>
             </div>
@@ -81,12 +84,6 @@ export default function UserProfilePage() {
                 <span className="font-medium text-foreground">{user.role}</span>
               </p>
             </div>
-            {/* {user.bio && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">About Me</h3>
-                <p className="text-muted-foreground">{user.bio}</p>
-              </div>
-            )} */}
           </CardContent>
         </Card>
       ) : (

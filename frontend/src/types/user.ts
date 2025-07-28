@@ -1,6 +1,5 @@
 import type { Category, Author } from './blog';
 
-// Basic User type (adjust properties based on your actual backend user schema)
 export interface User {
   _id: string;
   firstName: string;
@@ -11,7 +10,15 @@ export interface User {
   profileImage?: string;
   createdAt: string;
   updatedAt: string;
-  // Add any other user-related fields from your API response
+}
+
+export interface userProfileEditData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  // email: string;
+  // role: 'user' | 'admin';
 }
 
 // User role change data
@@ -38,7 +45,6 @@ export interface OperationResult {
 // Response for getting all users
 export interface AllUsersResponse {
   users: User[];
-  // You might also have pagination info here, similar to blog posts
   pagination?: {
     currentPage: number;
     totalPages: number;
@@ -46,8 +52,6 @@ export interface AllUsersResponse {
   };
 }
 
-// BlogPost and Comment types (referencing from your blog store, if needed in user store)
-// For simplicity, I'll keep them minimal here, assuming they are fully defined in types/blog.ts
 export interface UserBlogPost {
   _id: string;
   title: string;

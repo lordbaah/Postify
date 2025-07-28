@@ -10,6 +10,7 @@ import type {
   ChangeUserRoleData,
   UserPostsResponse,
   UserCommentsResponse,
+  userProfileEditData,
 } from '@/types/user';
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -51,6 +52,42 @@ export const useUserStore = create<UserState>((set, get) => ({
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch profile.';
       console.error('getUserProfile failed:', errorMessage);
+      set({
+        user: null,
+        isAuthenticated: false,
+        error: errorMessage,
+        isLoading: false,
+        isCheckingAuth: false,
+      });
+      return { success: false, message: errorMessage };
+    }
+  },
+
+  editUserProfile: async (
+    data: userProfileEditData
+  ): Promise<OperationResult> => {
+    set({ isLoading: true, error: null, success: null, isCheckingAuth: false }); // Set isCheckingAuth to false once an attempt is made
+    try {
+      const response = await apiInstance.put<ApiResponse<User>>(
+        '/users/profile',
+        data
+      );
+      const user = response.data?.data;
+
+      set({
+        user: user || null, // Ensure it's null if data is empty
+        isAuthenticated: !!user, // True if user data exists
+        isLoading: false,
+        isCheckingAuth: false,
+      });
+      return {
+        success: true,
+        message: response.data.message || 'Profile updated successfully.',
+      };
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || 'Failed to Updated profile.';
+      console.error('updateProfile failed:', errorMessage);
       set({
         user: null,
         isAuthenticated: false,
