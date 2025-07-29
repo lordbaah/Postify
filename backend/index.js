@@ -26,6 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 // Apply the rate limiting rule to all requests
 // app.use(ratelimiter);
 
+app.get('/', (req, res) => {
+  res.send('API is alive');
+});
+
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter); // This prefix will handle /api/v1/users/my-comments
