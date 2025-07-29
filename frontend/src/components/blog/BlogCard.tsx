@@ -38,10 +38,8 @@ const BlogCard = ({ _id, title, blogCategory, image }: cardContentProps) => {
           </div>
         )}
       </div>
-      <CardHeader className="pb-3">
-        <h3 className="text-lg font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-          {title}
-        </h3>
+      <CardHeader>
+        <h3 className="line-clamp-2">{title}</h3>
       </CardHeader>
 
       <CardContent>
@@ -49,7 +47,7 @@ const BlogCard = ({ _id, title, blogCategory, image }: cardContentProps) => {
           variant="secondary"
           className="bg-purple-100 text-purple-600 hover:bg-purple-200"
         >
-          {blogCategory || 'General'}
+          {blogCategory}
         </Badge>
       </CardContent>
 

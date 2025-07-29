@@ -34,8 +34,6 @@ const AppSidebar = () => {
 
   const handleSignOut = async () => {
     await signout();
-    // The apiInstance interceptor or the signout action itself should handle redirecting to /signin
-    // You might also want to display a toast message here after signing out.
   };
 
   // Define user dashboard navigation links in an array
@@ -64,8 +62,8 @@ const AppSidebar = () => {
   ];
 
   return (
-    <Sidebar className="">
-      <SidebarContent>
+    <Sidebar>
+      <SidebarContent className="py-6 px-4">
         <div className="">
           <h2 className="">Dashboard</h2>
           {user && <p className="">Welcome, {user.userName}!</p>}

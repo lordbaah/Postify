@@ -3,13 +3,11 @@ import { useUserStore } from '@/store/userStore';
 import { useCommentStore } from '@/store/commentStore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertCircle, Calendar, User, ExternalLink } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-
 import {
   Dialog,
   DialogContent,
@@ -18,6 +16,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import ProfilePageLoaders from '@/components/common/ProfilePageLoaders';
 
 const UserMyCommentsPage = () => {
   const { getUserComments, userComments, error, isLoading } = useUserStore();
@@ -67,26 +66,9 @@ const UserMyCommentsPage = () => {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="flex items-start space-x-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-16 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ProfilePageLoaders />
       ) : userComments && userComments.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {userComments.map((comment) => (
             <Card key={comment._id}>
               <CardHeader>

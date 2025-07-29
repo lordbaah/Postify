@@ -17,9 +17,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertCircle,
@@ -32,6 +30,7 @@ import {
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import ProfilePageLoaders from '@/components/common/ProfilePageLoaders';
 
 const UserMyPostsPage = () => {
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
@@ -44,8 +43,6 @@ const UserMyPostsPage = () => {
     getUserPosts();
   }, []);
 
-  // console.log(userPosts.map(p => p.));
-
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -56,18 +53,6 @@ const UserMyPostsPage = () => {
       </div>
     );
   }
-
-  // const handleDeleteBlogPost = async (postId: string) => {
-  //   try {
-  //     const result = await deleteBlogPost(postId);
-  //     if (result.success) {
-  //     }
-
-  //     await getUserPosts();
-  //   } catch (error) {
-  //     console.error('Delete Post error:', error);
-  //   }
-  // };
 
   const handleDeleteBlogPost = async () => {
     if (!postToDelete) return;
@@ -99,23 +84,7 @@ const UserMyPostsPage = () => {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-48 w-full rounded-lg mb-4" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ProfilePageLoaders />
       ) : userPosts && userPosts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {userPosts.map((post) => (

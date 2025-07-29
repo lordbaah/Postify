@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import usePageTitle from '@/hooks/usePageTitle';
 import BlogCard from '@/components/blog/BlogCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,40 +12,61 @@ import {
 import { usePostStore } from '@/store/postStore';
 import { useCategoryStore } from '@/store/categoryStore';
 import { Button } from '@/components/ui/button';
-import { useSearchParams } from 'react-router-dom';
+// import type { Pagination } from '@/types/blog';
+// import { useAuthToast } from '@/hooks/useAuthToast';
 
 const BlogListPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = parseInt(searchParams.get('page') || '1');
-  const selectedCategory = searchParams.get('category') || 'all';
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [lmit] = useState(6);
 
-  const { getAllBlogPosts, blogPosts, pagination, isLoading } = usePostStore();
+  const { getAllBlogPosts, blogPosts, pagination, isLoading, error } =
+    usePostStore();
+
   const { getAllBlogCategory, categories } = useCategoryStore();
 
-  usePageTitle('Blogs');
+  usePageTitle('Blogs'); // Set the page title
+  // useAuthToast();
 
   useEffect(() => {
     getAllBlogCategory();
   }, []);
 
   useEffect(() => {
-    const categoryParam = selectedCategory === 'all' ? '' : selectedCategory;
-    getAllBlogPosts(currentPage, 6, categoryParam);
+    // getAllBlogPosts(1, 20, 'React JS');
+    getAllBlogPosts(currentPage, lmit, selectedCategory);
   }, [currentPage, selectedCategory]);
 
+  // console.log(blogPosts);
+  console.log(pagination);
+
+  // // Get all posts
+  // getAllBlogPosts();
+
+  // // Get posts with pagination
+  // first number is page=1, second is limit=10
+  // getAllBlogPosts(1, 10);
+
+  // // Get posts by category
+  // getAllBlogPosts(undefined, undefined, 'Technology');
+
+  // // Get posts with category and pagination
+  // getAllBlogPosts(1, 10, 'Technology');
+
   const handleCategoryChange = (value: string) => {
-    setSearchParams({ category: value, page: '1' });
+    if (value === 'all') {
+      setSelectedCategory('');
+      setCurrentPage(1);
+    } else {
+      setSelectedCategory(value);
+      setCurrentPage(1);
+    }
   };
 
-  const handlePageChange = (page: number) => {
-    setSearchParams({
-      category: selectedCategory,
-      page: page.toString(),
-    });
-  };
+  console.log(selectedCategory);
 
   return (
-    <div>
+    <div className="">
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight">Blog</h1>
         <p className="text-muted-foreground mt-2">
@@ -55,8 +76,8 @@ const BlogListPage = () => {
 
       {/* Category Filter */}
       <div className="mb-8 flex justify-center">
-        <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-          <SelectTrigger>
+        <Select onValueChange={handleCategoryChange}>
+          <SelectTrigger className="">
             <SelectValue placeholder="Filter by Category" />
           </SelectTrigger>
           <SelectContent>
@@ -70,7 +91,6 @@ const BlogListPage = () => {
         </Select>
       </div>
 
-      {/* Loading Skeleton */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -91,33 +111,31 @@ const BlogListPage = () => {
               _id={post._id}
               title={post.title}
               blogCategory={post.category?.name || 'General'}
-              image={post.image ?? undefined}
+              image={post?.image ?? undefined}
             />
           ))}
         </div>
       )}
 
-      {/* Empty State */}
       {blogPosts.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No blog posts found.</p>
         </div>
       )}
 
-      {/* Pagination */}
       {pagination?.totalPages && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center mt-10 gap-4">
+        <div className="flex items-center justify-center mt-10">
           <Button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setCurrentPage((page) => page - 1)}
             disabled={!pagination?.hasPrevPage}
           >
-            Prev
+            prev
           </Button>
           <p>
-            {pagination.currentPage} / {pagination.totalPages}
+            {pagination?.currentPage} / {pagination?.totalPages}
           </p>
           <Button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setCurrentPage((page) => page + 1)}
             disabled={!pagination?.hasNextPage}
           >
             Next

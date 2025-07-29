@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface userProfileEditData {
-  _id: string;
+  // _id: string;
   firstName: string;
   lastName: string;
   userName: string;
@@ -106,6 +106,7 @@ export interface UserState {
   // Actions
   clearMessages: () => void;
   getUserProfile: () => Promise<OperationResult>;
+  editUserProfile: (data: userProfileEditData) => Promise<OperationResult>;
   // New actions
   getAllUsersAdmin: () => Promise<OperationResult>;
   changeUserRole: (

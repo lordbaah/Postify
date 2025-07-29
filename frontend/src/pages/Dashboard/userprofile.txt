@@ -1,20 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { AlertCircle, User, Mail, Briefcase } from 'lucide-react';
-import EditProfileModal from '@/components/user/EditProfileModal';
 
 export default function UserProfilePage() {
-  const { user, getUserProfile, isLoading, error } = useUserStore();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    user,
+    getUserProfile,
+    isLoading,
+    error,
+    updateUserProfileImage,
+    deleteUserProfileImage,
+    editUserProfile,
+  } = useUserStore();
 
   useEffect(() => {
     getUserProfile();
   }, []);
+
+  
 
   if (error) {
     return (
@@ -29,16 +36,11 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="mb-2 text-2xl font-bold">User Profile</h1>
-          <p className="text-muted-foreground">
-            View and manage your personal profile information.
-          </p>
-        </div>
-        {user && (
-          <Button onClick={() => setIsModalOpen(true)}>Edit Profile</Button>
-        )}
+      <div className="mb-8">
+        <h1 className="mb-2">User Profile</h1>
+        <p className="text-muted-foreground">
+          View and manage your personal profile information.
+        </p>
       </div>
 
       {isLoading ? (
@@ -72,9 +74,10 @@ export default function UserProfilePage() {
           <CardContent className="space-y-4">
             <div>
               <h2>
-                Welcome to your Profile {user.firstName} {user.lastName}
+                Welocome to your Profile {user.firstName} {user.lastName}
               </h2>
             </div>
+
             <div className="flex items-center gap-3 text-lg text-muted-foreground">
               <Mail className="h-5 w-5 text-primary" />
               <p>
@@ -102,12 +105,6 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Modal for editing profile (details + image) */}
-      <EditProfileModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 }

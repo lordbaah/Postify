@@ -13,7 +13,7 @@ import type {
   userProfileEditData,
 } from '@/types/user';
 
-export const useUserStore = create<UserState>((set, get) => ({
+export const useUserStore = create<UserState>((set) => ({
   // Initial states
   user: null,
   isAuthenticated: false,
@@ -66,35 +66,36 @@ export const useUserStore = create<UserState>((set, get) => ({
   editUserProfile: async (
     data: userProfileEditData
   ): Promise<OperationResult> => {
-    set({ isLoading: true, error: null, success: null, isCheckingAuth: false }); // Set isCheckingAuth to false once an attempt is made
+    set({ isLoading: true, error: null, success: null });
     try {
       const response = await apiInstance.put<ApiResponse<User>>(
         '/users/profile',
         data
       );
-      const user = response.data?.data;
+      const updatedUser = response.data?.data;
 
-      set({
-        user: user || null, // Ensure it's null if data is empty
-        isAuthenticated: !!user, // True if user data exists
+      set((state) => ({
+        user: updatedUser ? { ...state.user, ...updatedUser } : state.user, // merge with existing user
+        isAuthenticated: true, // Keep user logged in
         isLoading: false,
-        isCheckingAuth: false,
-      });
+        success: response.data.message || 'Profile updated successfully.',
+      }));
+
       return {
         success: true,
         message: response.data.message || 'Profile updated successfully.',
       };
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || 'Failed to Updated profile.';
-      console.error('updateProfile failed:', errorMessage);
-      set({
-        user: null,
-        isAuthenticated: false,
+        error.response?.data?.message || 'Failed to update profile.';
+      console.error('editUserProfile failed:', errorMessage);
+      set((state) => ({
         error: errorMessage,
         isLoading: false,
-        isCheckingAuth: false,
-      });
+        success: null,
+        user: state.user, // Don't clear the user on error
+        isAuthenticated: true, // Keep the session alive
+      }));
       return { success: false, message: errorMessage };
     }
   },
@@ -212,7 +213,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ isLoading: true, error: null, success: null });
     try {
       const formData = new FormData();
-      formData.append('image', file); // 'image' should match the field name your backend expects
+      formData.append('profileImage', file);
 
       const response = await apiInstance.put<ApiResponse>(
         `/users/profile/${id}/image`,
@@ -224,7 +225,6 @@ export const useUserStore = create<UserState>((set, get) => ({
         }
       );
       set((state) => ({
-        // Assuming the API returns the updated user with the new image URL
         user: response.data.data?.user || state.user,
         success: response.data.message,
         isLoading: false,
