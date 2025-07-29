@@ -14,6 +14,7 @@ const ENV = {
   MONGO_DB_URI: process.env.MONGO_DB_URI,
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  CLIENT_URL: process.env.CLIENT_URL,
   // MAIL_TRAP_HOST: process.env.MAIL_TRAP_HOST,
   // MAIL_TRAP_PORT: process.env.MAIL_TRAP_PORT,
   // MAIL_TRAP_USERNAME: process.env.MAIL_TRAP_USERNAME,
