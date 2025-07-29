@@ -41,13 +41,13 @@ export const usePostStore = create<PostState>((set) => ({
         data,
         config
       );
-      console.log(response);
+      // console.log(response);
       set({ success: response.data.message, isLoading: false });
       return { success: true, message: response.data.message };
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error creating post. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -82,7 +82,7 @@ export const usePostStore = create<PostState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error fetching posts. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -104,7 +104,7 @@ export const usePostStore = create<PostState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error fetching post. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -135,7 +135,7 @@ export const usePostStore = create<PostState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error editing post. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -157,7 +157,7 @@ export const usePostStore = create<PostState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error deleting post. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }

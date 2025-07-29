@@ -34,7 +34,7 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error creating category. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -52,10 +52,10 @@ export const useCategoryStore = create<CategoryState>((set) => ({
       });
       return { success: true, message: response.data.message };
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       const errorMessage: string =
         error.response?.data?.message || 'Error fetching categories.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -75,7 +75,7 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error getting category. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -96,7 +96,7 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error editing category. Try again.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -119,7 +119,7 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     } catch (error: any) {
       const errorMessage: string =
         error.response?.data?.message || 'Error deleting category.';
-      console.log('error:', errorMessage);
+      // console.log('error:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }

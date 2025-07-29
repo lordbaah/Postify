@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 
@@ -6,7 +5,7 @@ interface AdminRouteProps {
   children: React.ReactNode;
 }
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
+const AdminRoute = ({ children }: AdminRouteProps) => {
   const { isAuthenticated, user, isCheckingAuth } = useAuthStore();
 
   // Show a loading indicator while the initial auth check is in progress

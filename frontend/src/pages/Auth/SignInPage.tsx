@@ -43,7 +43,7 @@ const SignInPage = () => {
 
   const handleSignIn = async (data: SignInData) => {
     const result = await signin(data);
-    console.log('Sign in attempt:', data);
+    // console.log('Sign in attempt:', data);
 
     if (result.success) {
       form.reset();

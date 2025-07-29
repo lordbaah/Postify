@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/v1';
-// const API_URL = 'https://dummyjson.com';
+// const API_URL = 'http://localhost:5000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Create an axios instance
 const apiInstance = axios.create({

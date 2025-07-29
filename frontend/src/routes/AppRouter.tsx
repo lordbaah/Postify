@@ -1,4 +1,3 @@
-// src/router/AppRouter.tsx
 import React from 'react';
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -9,7 +8,7 @@ import PublicOnlyRoute from './PublicOnlyRoute';
 import { useAuthStore } from '@/store/authStore';
 
 const AppRouter = () => {
-  const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
+  const { isCheckingAuth, checkAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();

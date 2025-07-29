@@ -38,7 +38,7 @@ const SignUpPage = () => {
     const { confirmPassword, ...payload } = data;
 
     const result = await signup(payload);
-    console.log('Submitted payload:', payload);
+    // console.log('Submitted payload:', payload);
 
     if (result.success) {
       form.reset();

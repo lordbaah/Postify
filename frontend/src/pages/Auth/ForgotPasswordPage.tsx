@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
   usePageTitle('Forgot Password');
 
   const resetPassword = async (data: ForgotPasswordData) => {
-    console.log('Forgot password request:', data.email);
+    // console.log('Forgot password request:', data.email);
 
     const result = await forgotPassword(data.email);
 

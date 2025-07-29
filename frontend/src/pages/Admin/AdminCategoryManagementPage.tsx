@@ -133,7 +133,7 @@ const AdminCategoryManagementPage = () => {
       setSelectedCategory(null);
     } catch (error) {
       // Error is handled by the store error state and useEffect above
-      console.error('Delete category error:', error);
+      // console.error('Delete category error:', error);
     }
   };
 
@@ -163,7 +163,7 @@ const AdminCategoryManagementPage = () => {
       setSelectedCategory(null);
     } catch (error) {
       // Error is handled by the store error state and useEffect above
-      console.error('Edit category error:', error);
+      // console.error('Edit category error:', error);
     }
   };
 

@@ -1,5 +1,3 @@
-// src/pages/Admin/AdminAllPostsPage.tsx
-
 const AdminAllPostsPage = () => {
   return (
     <div className="p-6">

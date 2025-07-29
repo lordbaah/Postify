@@ -36,7 +36,7 @@ export const useCommentStore = create<CommentState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error creating comment. Try again.';
-      console.error('createComment failed:', errorMessage);
+      // console.error('createComment failed:', errorMessage);
       set({ error: errorMessage, isCreating: false });
       return { success: false, message: errorMessage };
     }
@@ -58,7 +58,7 @@ export const useCommentStore = create<CommentState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error editing comment. Try again.';
-      console.error('editComment failed:', errorMessage);
+      // console.error('editComment failed:', errorMessage);
       set({ error: errorMessage, isEditing: false });
       return { success: false, message: errorMessage };
     }
@@ -76,7 +76,7 @@ export const useCommentStore = create<CommentState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error deleting comment. Try again.';
-      console.error('deleteComment failed:', errorMessage);
+      // console.error('deleteComment failed:', errorMessage);
       set({ error: errorMessage, isDeleting: false });
       return { success: false, message: errorMessage };
     }

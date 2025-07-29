@@ -1,6 +1,3 @@
-// src/pages/Admin/AdminAllCommentsPage.tsx
-import React from 'react';
-
 const AdminAllCommentsPage = () => {
   return (
     <div className="p-6">

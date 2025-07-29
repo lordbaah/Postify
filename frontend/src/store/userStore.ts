@@ -51,7 +51,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch profile.';
-      console.error('getUserProfile failed:', errorMessage);
+      // console.error('getUserProfile failed:', errorMessage);
       set({
         user: null,
         isAuthenticated: false,
@@ -88,7 +88,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Failed to update profile.';
-      console.error('editUserProfile failed:', errorMessage);
+      // console.error('editUserProfile failed:', errorMessage);
       set((state) => ({
         error: errorMessage,
         isLoading: false,
@@ -121,7 +121,7 @@ export const useUserStore = create<UserState>((set) => ({
       const errorMessage =
         error.response?.data?.message ||
         'Error fetching all users. (Admin access required)';
-      console.error('getAllUsersAdmin failed:', errorMessage);
+      // console.error('getAllUsersAdmin failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -151,7 +151,7 @@ export const useUserStore = create<UserState>((set) => ({
       const errorMessage =
         error.response?.data?.message ||
         'Error changing user role. (Admin access required)';
-      console.error('changeUserRole failed:', errorMessage);
+      // console.error('changeUserRole failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -175,7 +175,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error fetching user posts.';
-      console.error('getUserPosts failed:', errorMessage);
+      // console.error('getUserPosts failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -199,7 +199,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error fetching user comments.';
-      console.error('getUserComments failed:', errorMessage);
+      // console.error('getUserComments failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -233,7 +233,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error updating profile image.';
-      console.error('updateUserProfileImage failed:', errorMessage);
+      // console.error('updateUserProfileImage failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
@@ -256,7 +256,7 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || 'Error deleting profile image.';
-      console.error('deleteUserProfileImage failed:', errorMessage);
+      // console.error('deleteUserProfileImage failed:', errorMessage);
       set({ error: errorMessage, isLoading: false });
       return { success: false, message: errorMessage };
     }
