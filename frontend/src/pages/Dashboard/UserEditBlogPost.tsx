@@ -59,9 +59,9 @@ const UserEditBlogPost = () => {
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [existingImageUrl] = useState<string | null>(null);
   const [keepExistingImage, setKeepExistingImage] = useState<boolean>(true);
-  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(true);
+  // const [isLoadingPost, setIsLoadingPost] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
