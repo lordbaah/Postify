@@ -30,6 +30,10 @@ app.get('/', (req, res) => {
   res.send('API is alive');
 });
 
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ status: 'OK', uptime: process.uptime() });
+});
+
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter); // This prefix will handle /api/v1/users/my-comments
