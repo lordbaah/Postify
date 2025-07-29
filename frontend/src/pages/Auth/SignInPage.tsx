@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import usePageTitle from '@/hooks/usePageTitle';
 
 // Local schema (not exported)
 const signInSchema = z.object({
@@ -38,6 +39,7 @@ const SignInPage = () => {
   const { signin, isLoading } = useAuthStore();
   const navigate = useNavigate();
   useAuthToast();
+  usePageTitle('SignIn');
 
   const handleSignIn = async (data: SignInData) => {
     const result = await signin(data);

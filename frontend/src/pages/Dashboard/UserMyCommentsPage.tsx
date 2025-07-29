@@ -3,9 +3,8 @@ import { useUserStore } from '@/store/userStore';
 import { useCommentStore } from '@/store/commentStore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AlertCircle, Calendar, User, ExternalLink } from 'lucide-react';
+import { Calendar, User, ExternalLink } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import {
@@ -17,6 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import ProfilePageLoaders from '@/components/common/ProfilePageLoaders';
+import ErrorAlert from '@/components/blog/blog-details/ErrorAlert';
 
 const UserMyCommentsPage = () => {
   const { getUserComments, userComments, error, isLoading } = useUserStore();
@@ -43,14 +43,11 @@ const UserMyCommentsPage = () => {
   };
 
   if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
-    );
+    return <ErrorAlert message={error} />;
+  }
+
+  if (isLoading) {
+    return <ProfilePageLoaders />;
   }
 
   return (
@@ -65,9 +62,7 @@ const UserMyCommentsPage = () => {
         </p>
       </div>
 
-      {isLoading ? (
-        <ProfilePageLoaders />
-      ) : userComments && userComments.length > 0 ? (
+      {userComments && userComments.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {userComments.map((comment) => (
             <Card key={comment._id}>

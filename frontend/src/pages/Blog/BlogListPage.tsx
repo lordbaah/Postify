@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import usePageTitle from '@/hooks/usePageTitle';
 import BlogCard from '@/components/blog/BlogCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectTrigger,
@@ -13,13 +12,16 @@ import { usePostStore } from '@/store/postStore';
 import { useCategoryStore } from '@/store/categoryStore';
 import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'react-router-dom';
+import BlogListLoader from './BlogListLoader';
+import ErrorAlert from '@/components/blog/blog-details/ErrorAlert';
 
 const BlogListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1');
   const selectedCategory = searchParams.get('category') || 'all';
 
-  const { getAllBlogPosts, blogPosts, pagination, isLoading } = usePostStore();
+  const { getAllBlogPosts, blogPosts, pagination, isLoading, error } =
+    usePostStore();
   const { getAllBlogCategory, categories } = useCategoryStore();
 
   usePageTitle('Blogs');
@@ -43,6 +45,14 @@ const BlogListPage = () => {
       page: page.toString(),
     });
   };
+
+  if (isLoading) {
+    return <BlogListLoader />;
+  }
+
+  if (error) {
+    return <ErrorAlert message={error} />;
+  }
 
   return (
     <div>
@@ -70,20 +80,7 @@ const BlogListPage = () => {
         </Select>
       </div>
 
-      {/* Loading Skeleton */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
+      {blogPosts && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogPosts.map((post) => (
             <BlogCard

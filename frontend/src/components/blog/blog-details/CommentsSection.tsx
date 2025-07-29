@@ -12,8 +12,12 @@ const CommentsSection = ({ comments }: PostCommentProps) => {
   const [commentList, setCommentList] = useState<Comment[]>(comments);
 
   const handleDeleteComment = (commentId: string) => {
+    setCommentList((prev) => prev.filter((c) => c._id !== commentId));
+  };
+
+  const handleEditComment = (commentId: string, newText: string) => {
     setCommentList((prev) =>
-      prev.filter((comment) => comment._id !== commentId)
+      prev.map((c) => (c._id === commentId ? { ...c, text: newText } : c))
     );
   };
 
@@ -21,7 +25,7 @@ const CommentsSection = ({ comments }: PostCommentProps) => {
     <>
       <Separator />
       <section className="space-y-6">
-        <h2 className="">Comments ({commentList.length})</h2>
+        <h2>Comments ({commentList.length})</h2>
 
         {commentList.length > 0 ? (
           <div className="space-y-4">
@@ -30,6 +34,7 @@ const CommentsSection = ({ comments }: PostCommentProps) => {
                 key={comment._id}
                 comment={comment}
                 onDelete={handleDeleteComment}
+                onEdit={handleEditComment}
               />
             ))}
           </div>

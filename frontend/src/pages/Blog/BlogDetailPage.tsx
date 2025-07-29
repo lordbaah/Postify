@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom';
 import { usePostStore } from '@/store/postStore';
 import usePageTitle from '@/hooks/usePageTitle';
 
-import ErrorAlert from '@/components/blog/ErrorAlert';
-import LoadingSkeleton from '@/components/blog/LoadingSkeleton';
-import PostHeader from '@/components/blog/PostHeader';
-import PostCoverImage from '@/components/blog/PostCoverImage';
-import PostContent from '@/components/blog/PostContent';
-import CommentsSection from '@/components/blog/CommentsSection';
-import BlogComment from '@/components/blog/BlogComment';
+import ErrorAlert from '@/components/blog/blog-details/ErrorAlert';
+import LoadingSkeleton from '@/components/blog/blog-details/LoadingSkeleton';
+import PostHeader from '@/components/blog/blog-details/PostHeader';
+import PostCoverImage from '@/components/blog/blog-details/PostCoverImage';
+import PostContent from '@/components/blog/blog-details/PostContent';
+import CommentsSection from '@/components/blog/blog-details/CommentsSection';
+import BlogComment from '@/components/blog/blog-details/BlogComment';
 
 export default function BlogDetailPage() {
   const { id } = useParams();

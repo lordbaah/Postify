@@ -3,8 +3,8 @@ import { useCommentStore } from '@/store/commentStore';
 import { usePostStore } from '@/store/postStore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import z from 'zod';
 import {
@@ -23,40 +23,27 @@ const commentSchema = z.object({
     .max(2000, { message: 'Comment is too long (max 2000 characters).' }),
 });
 
-// Infer the TypeScript type from the Zod schema for type safety.
 type CommentFormData = z.infer<typeof commentSchema>;
 
-// post id as a props for other components
 interface BlogCommentProps {
   postId: string;
 }
 
 const BlogComment = ({ postId }: BlogCommentProps) => {
-  const {
-    createComment,
-    deleteComment,
-    isLoading: IscommmentLoading,
-    error,
-    success,
-    clearMessages,
-  } = useCommentStore();
+  const { createComment, isCreating, success, error, clearMessages } =
+    useCommentStore();
 
-  const { getSinglePost, currentPostComments } = usePostStore();
+  const { getSinglePost } = usePostStore();
 
   const form = useForm<CommentFormData>({
     resolver: zodResolver(commentSchema),
-    defaultValues: {
-      text: '',
-    },
+    defaultValues: { text: '' },
   });
 
   const handleCreateComment = async (data: CommentFormData) => {
-    // console.log(data.text, postId);
-
     const result = await createComment(postId, data);
     if (result.success) {
       form.reset();
-      // console.log(` ${result.success} ${result.message}`);
       getSinglePost(postId);
     }
   };
@@ -64,20 +51,13 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
   useEffect(() => {
     if (success) {
       toast.success(success);
-      clearMessages(); // Clear immediately after showing
+      clearMessages();
     }
     if (error) {
       toast.error(error);
-      clearMessages(); // Clear immediately after showing
+      clearMessages();
     }
   }, [success, error, clearMessages]);
-
-  // const handleEditComment = async (data) => {
-  //   const result = await editComment(data, postId);
-  //   if (result.success) {
-  //     //reset form
-  //   }
-  // };
 
   return (
     <div className="mt-8 p-4 border rounded-lg shadow-sm">
@@ -92,8 +72,7 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
             name="text"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="sr-only">Your Comment</FormLabel>{' '}
-                {/* Visually hidden label */}
+                <FormLabel className="sr-only">Your Comment</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Type your comment here..."
@@ -101,16 +80,16 @@ const BlogComment = ({ postId }: BlogCommentProps) => {
                     {...field}
                   />
                 </FormControl>
-                <FormMessage /> {/* Displays validation error message */}
+                <FormMessage />
               </FormItem>
             )}
           />
           <Button
-            disabled={IscommmentLoading}
+            disabled={isCreating}
             type="submit"
             className="w-full sm:w-auto"
           >
-            {IscommmentLoading ? 'Posting Comment...' : 'Share comment'}
+            {isCreating ? 'Posting Comment...' : 'Share comment'}
           </Button>
         </form>
       </Form>

@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const verificationSchema = z.object({
   otp: z
@@ -33,6 +34,7 @@ const EmailVerificationPage = () => {
 
   const { verifyaccount, resendOtp } = useAuthStore();
   useAuthToast();
+  usePageTitle('Email Verification');
 
   const form = useForm<VerificationData>({
     resolver: zodResolver(verificationSchema),
@@ -86,9 +88,12 @@ const EmailVerificationPage = () => {
 
   return (
     <div className="max-w-md mx-auto py-10">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        Email Verification
-      </h2>
+      <h2 className="mb-4 text-center">Email Verification</h2>
+      <small className="mb-4">
+        Heads up: Our emails might land in your <strong>Spam</strong> or{' '}
+        <strong>Promotions</strong> folder. If you find one there, please mark
+        it as &ldquo;Not spam&rdquo; so you don&rsquo;t miss important updates.
+      </small>
 
       {email && (
         <p className="text-center text-gray-600 mb-4">

@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const resetPasswordSchema = z
   .object({
@@ -54,6 +55,7 @@ const ResetPasswordPage = () => {
   const [isResending, setIsResending] = useState(false);
 
   useAuthToast();
+  usePageTitle('ResetPassword');
 
   // Countdown timer for resend
   useEffect(() => {
@@ -105,6 +107,12 @@ const ResetPasswordPage = () => {
       <h1 className="text-2xl font-semibold mb-4 text-center">
         Reset Your Password
       </h1>
+
+      <small className="mb-4">
+        Heads up: Our emails might land in your <strong>Spam</strong> or{' '}
+        <strong>Promotions</strong> folder. If you find one there, please mark
+        it as &ldquo;Not spam&rdquo; so you don&rsquo;t miss important updates.
+      </small>
 
       {email && (
         <p className="text-center text-gray-600 mb-4">

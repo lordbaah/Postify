@@ -2,11 +2,11 @@ import nodemailer from 'nodemailer';
 import ENV from '../config/env.js';
 
 const transporter = nodemailer.createTransport({
-  host: ENV.MAIL_TRAP_HOST,
-  port: ENV.MAIL_TRAP_PORT || 587,
+  host: ENV.MAILJET_HOST,
+  port: ENV.MAILJET_PORT,
   auth: {
-    user: ENV.MAIL_TRAP_USERNAME,
-    pass: ENV.MAIL_TRAP_PASSWORD,
+    user: ENV.MAILJET_API_KEY,
+    pass: ENV.MAILJET_SECRET_KEY,
   },
   secure: false,
 });
@@ -14,14 +14,14 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async ({ to, subject, html }) => {
   try {
     await transporter.sendMail({
-      from: `"Postify" <no-reply@postify.dev>`,
+      from: `"Postify Team" <${ENV.SENDER_EMAIL}>`,
       to,
       subject,
       html,
     });
-    console.log(`📧 Email sent to ${to}`);
+    // console.log(`📧 Email sent to ${to}`);
   } catch (err) {
-    console.error(`❌ Failed to send email:`, err.message);
+    // console.error(`❌ Failed to send email:`, err.message);
   }
 };
 

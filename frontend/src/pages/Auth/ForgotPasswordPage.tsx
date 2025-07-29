@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -32,6 +33,7 @@ const ForgotPasswordPage = () => {
   const { forgotPassword } = useAuthStore();
   const navigate = useNavigate();
   useAuthToast();
+  usePageTitle('Forgot Password');
 
   const resetPassword = async (data: ForgotPasswordData) => {
     console.log('Forgot password request:', data.email);
@@ -49,10 +51,14 @@ const ForgotPasswordPage = () => {
   return (
     <div className="max-w-md mx-auto py-10">
       <div className="mb-4">
-        <h1 className="text-2xl font-semibold mb-6 text-center">
-          Forgot Password
-        </h1>
+        <h1 className="mb-6 text-center">Forgot Password</h1>
         <p>Enter your email address to receive a password reset code.</p>
+        <small className="mt-4">
+          Heads up: Our emails might land in your <strong>Spam</strong> or{' '}
+          <strong>Promotions</strong> folder. If you find one there, please mark
+          it as &ldquo;Not spam&rdquo; so you don&rsquo;t miss important
+          updates.
+        </small>
       </div>
       <Form {...form}>
         <form

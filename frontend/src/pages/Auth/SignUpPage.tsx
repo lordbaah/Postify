@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuthToast } from '@/hooks/useAuthToast';
+import usePageTitle from '@/hooks/usePageTitle';
 import { signUpSchema, type signUpData } from '@/schemas/signUpSchema';
 
 const SignUpPage = () => {
@@ -31,6 +32,7 @@ const SignUpPage = () => {
   const { signup, isLoading } = useAuthStore();
   const navigate = useNavigate();
   useAuthToast();
+  usePageTitle('SignUp');
 
   const handleSignUp = async (data: signUpData) => {
     const { confirmPassword, ...payload } = data;
