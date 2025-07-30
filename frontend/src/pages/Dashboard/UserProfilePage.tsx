@@ -22,17 +22,19 @@ export default function UserProfilePage() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="flex flex-col items-center gap-4 pb-6">
-          <Skeleton className="h-24 w-24 rounded-full" />
-          <Skeleton className="h-6 w-48" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardContent>
-      </Card>
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card>
+          <CardHeader className="flex flex-col items-center gap-4 pb-6">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

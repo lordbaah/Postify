@@ -62,9 +62,9 @@ const RecenPost = () => {
                 <p>{post.description}</p>
               </CardContent>
               <CardFooter>
-                <Button asChild variant="link" className="px-0">
+                {/* <Button asChild variant="link" className="px-0">
                   <Link to={`/blogs/${post.slug}`}>Read More</Link>
-                </Button>
+                </Button> */}
               </CardFooter>
             </Card>
           ))}

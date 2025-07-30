@@ -43,11 +43,19 @@ const UserMyCommentsPage = () => {
   };
 
   if (error) {
-    return <ErrorAlert message={error} />;
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <ErrorAlert message={error} />;
+      </div>
+    );
   }
 
   if (isLoading) {
-    return <ProfilePageLoaders />;
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <ProfilePageLoaders />;
+      </div>
+    );
   }
 
   return (
@@ -143,8 +151,12 @@ const UserMyCommentsPage = () => {
             <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleCommentDelete}>
-              Delete
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={handleCommentDelete}
+            >
+              {isLoading ? 'deleting...' : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

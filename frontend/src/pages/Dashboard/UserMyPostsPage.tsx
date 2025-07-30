@@ -192,8 +192,12 @@ const UserMyPostsPage = () => {
             <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteBlogPost}>
-              Delete
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={handleDeleteBlogPost}
+            >
+              {isLoading ? 'deleting...' : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>
