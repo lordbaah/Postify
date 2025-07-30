@@ -1,107 +1,308 @@
-# Postify
+# Posity - Docker Setup 🐳
 
-Postify is a full-stack application consisting of a React frontend, Node.js backend, and MongoDB database. This repository contains Docker configurations to build and run the app seamlessly using containers.
+Posity is a full-stack MERN application consisting of a React frontend (Vite), Node.js backend, and MongoDB database. This guide provides Docker configurations to build and run the application seamlessly using containers.
 
 ---
 
-## Folder Structure
+## 📁 Project Structure
 
-postify/
+```
+posity/
 ├── backend/
-│ ├── Dockerfile
-│ ├── src/
-│ ├── package.json
-│ └── ...
+│   ├── Dockerfile
+│   ├── src/
+│   ├── package.json
+│   └── ...
 ├── frontend/
-│ ├── Dockerfile
-│ ├── nginx/
-│ │ └── default.conf
-│ ├── src/
-│ ├── package.json
-│ └── ...
+│   ├── Dockerfile
+│   ├── nginx/
+│   │   └── default.conf
+│   ├── src/
+│   ├── package.json
+│   └── ...
 ├── docker-compose.yml
 └── README.md
-
----
-
-## Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) installed on your machine
-- [Docker Compose](https://docs.docker.com/compose/install/) (optional but recommended)
-
----
-
-## Setup & Running Locally with Docker
-
-### 1. Build Docker Images
-
-Navigate to the project root and build the images manually:
-
-```bash
-docker build -t postify-backend ./backend
-docker build -t postify-frontend ./frontend
 ```
 
-Or build all with Docker Compose: docker-compose build
+---
 
-### 2. Run Containers
+## 🔧 Prerequisites
 
-Manually start each container:
-docker run -d -p 5000:5000 --name postify-backend postify-backend
-docker run -d -p 3000:80 --name postify-frontend postify-frontend
-docker run -d -p 27017:27017 --name postify-mongo mongo
-Or start all with Docker Compose: docker-compose up -d
+Before getting started, ensure you have the following installed:
 
-3. Access the App
-   Frontend: http://localhost:3000
+- [Docker](https://docs.docker.com/get-docker/) (v20.0 or higher)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0 or higher recommended)
 
-Backend API: http://localhost:5000/api/v1
+---
 
-MongoDB: connects internally inside Docker network (no UI)
+## 🚀 Quick Start with Docker
 
-Development Workflow
-Make code changes in frontend/src or backend/src.
+### Method 1: Using Docker Compose (Recommended)
 
-Rebuild Docker images to apply changes:
-docker-compose build
-docker-compose up -d
+1. **Clone the repository:**
 
-Or manually rebuild and restart containers (see Running Containers).
+   ```bash
+   git clone <repository-url>
+   cd posity
+   ```
 
-Handling CORS Issues
-If you encounter CORS errors, ensure your backend server is configured to accept requests from your frontend URL (http://localhost:3000), for example using the cors middleware in Express:
+2. **Set up environment variables:**
 
+   - Copy `.env.example` to `.env` in both `backend/` and `frontend/` directories
+   - Update the environment variables as needed
+
+3. **Build and start all services:**
+
+   ```bash
+   docker-compose up -d --build
+   ```
+
+4. **Access the application:**
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:5000/api/v1
+   - **MongoDB**: Available internally on Docker network
+
+### Method 2: Manual Docker Commands
+
+If you prefer to build and run containers individually:
+
+1. **Build Docker images:**
+
+   ```bash
+   docker build -t posity-backend ./backend
+   docker build -t posity-frontend ./frontend
+   ```
+
+2. **Run containers:**
+
+   ```bash
+   # Start MongoDB
+   docker run -d -p 27017:27017 --name posity-mongo mongo:latest
+
+   # Start Backend
+   docker run -d -p 5000:5000 --name posity-backend posity-backend
+
+   # Start Frontend
+   docker run -d -p 3000:80 --name posity-frontend posity-frontend
+   ```
+
+---
+
+## 🔄 Development Workflow
+
+### Making Changes
+
+1. **Modify your code** in `frontend/src` or `backend/src`
+
+2. **Rebuild and restart services:**
+
+   ```bash
+   docker-compose build
+   docker-compose up -d
+   ```
+
+3. **For faster development**, you can rebuild specific services:
+
+   ```bash
+   # Rebuild only backend
+   docker-compose build backend
+   docker-compose up -d backend
+
+   # Rebuild only frontend
+   docker-compose build frontend
+   docker-compose up -d frontend
+   ```
+
+### Hot Reloading (Development Mode)
+
+To enable hot reloading during development, you can override the Docker setup:
+
+```bash
+# Create a docker-compose.override.yml for development
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+```
+
+---
+
+## 🌐 Network Configuration
+
+### Handling CORS Issues
+
+If you encounter CORS errors, ensure your backend server accepts requests from your frontend URL. In your Express backend:
+
+```javascript
 import cors from 'cors';
 
-app.use(cors({
-origin: 'http://localhost:3000',
-credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true,
+  })
+);
+```
 
-Useful Docker Commands
+### Environment Variables
 
-| Command                            | Description                       |
-| ---------------------------------- | --------------------------------- |
-| `docker ps`                        | List running containers           |
-| `docker logs <container>`          | Show logs for a container         |
-| `docker exec -it <container> bash` | Open shell inside a container     |
-| `docker-compose up -d`             | Start containers in detached mode |
-| `docker-compose down`              | Stop and remove containers        |
-| `docker-compose build`             | Build or rebuild images           |
-| `docker-compose logs -f`           | Follow container logs             |
+Make sure your environment variables are properly configured:
 
-Troubleshooting
-404 Not Found in Frontend: Confirm Nginx is serving the correct build directory and check your default.conf file.
+**Backend (.env):**
 
-CORS Policy Errors: Double-check backend CORS config matches your frontend origin URL.
+```env
+CLIENT_URL=http://localhost:3000
+MONGO_DB_URI=mongodb://posity-mongo:27017/posity
+# ... other variables
+```
 
-Port Conflicts: Make sure ports 3000, 5000, and 27017 are free on your machine.
+**Frontend (.env):**
 
-Changes not applied: Rebuild images with --no-cache option or remove containers before restarting.
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-Deployment
-You can deploy your backend and frontend separately on platforms like Render or Vercel if you prefer not to use Docker in production.
-License
-MIT
+---
 
-Feel free to open issues or submit pull requests for improvements!
+## 📋 Useful Docker Commands
+
+| Command                            | Description                         |
+| ---------------------------------- | ----------------------------------- |
+| `docker-compose up -d`             | Start all services in detached mode |
+| `docker-compose down`              | Stop and remove all containers      |
+| `docker-compose build`             | Build or rebuild all images         |
+| `docker-compose logs -f`           | Follow logs from all services       |
+| `docker-compose logs <service>`    | View logs for specific service      |
+| `docker ps`                        | List running containers             |
+| `docker exec -it <container> bash` | Open shell inside container         |
+| `docker system prune`              | Clean up unused Docker resources    |
+
+### Service-Specific Commands
+
+```bash
+# Restart specific service
+docker-compose restart backend
+
+# View logs for specific service
+docker-compose logs -f frontend
+
+# Execute commands in running container
+docker-compose exec backend npm run seed
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions
+
+**1. Port Conflicts**
+
+```bash
+# Check what's using the ports
+lsof -i :3000
+lsof -i :5000
+lsof -i :27017
+
+# Kill processes if needed
+sudo kill -9 <PID>
+```
+
+**2. 404 Not Found in Frontend**
+
+- Verify Nginx configuration in `frontend/nginx/default.conf`
+- Ensure the build directory is correctly mapped
+- Check if frontend build was successful
+
+**3. CORS Policy Errors**
+
+- Verify `CLIENT_URL` in backend environment variables
+- Ensure CORS middleware is properly configured
+- Check if frontend URL matches backend CORS origin
+
+**4. Database Connection Issues**
+
+- Verify MongoDB container is running: `docker ps`
+- Check MongoDB connection string in backend `.env`
+- Ensure database container name matches connection string
+
+**5. Changes Not Applied**
+
+```bash
+# Force rebuild without cache
+docker-compose build --no-cache
+
+# Remove containers and rebuild
+docker-compose down
+docker-compose up -d --build
+```
+
+**6. Container Memory Issues**
+
+```bash
+# Check Docker resource usage
+docker stats
+
+# Clean up unused resources
+docker system prune -a
+```
+
+---
+
+## 🔒 Security Considerations
+
+### Production Deployment
+
+- Use specific image tags instead of `latest`
+- Set up proper secrets management
+- Configure reverse proxy (Nginx/Traefik)
+- Enable HTTPS/SSL certificates
+- Set up proper backup strategies for MongoDB
+
+### Environment Variables
+
+Never commit sensitive environment variables to version control:
+
+```bash
+# Add to .gitignore
+.env
+.env.local
+.env.production
+```
+
+---
+
+## 📦 Production Deployment
+
+While this Docker setup works for production, consider these platforms for easier deployment:
+
+- **Frontend**: Vercel, Netlify
+- **Backend**: Render, Railway, DigitalOcean
+- **Database**: MongoDB Atlas, AWS DocumentDB
+
+For containerized production deployment:
+
+- Use Docker Swarm or Kubernetes
+- Implement proper logging and monitoring
+- Set up CI/CD pipelines
+- Configure load balancing
+
+---
+
+## 🤝 Contributing
+
+When contributing to the Docker setup:
+
+1. Test your changes with both development and production builds
+2. Update documentation for any new Docker configurations
+3. Ensure backward compatibility when possible
+4. Test on different operating systems if available
+
+---
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+**Need help?** Check the main [README.md](../README.md) for general project information or open an issue for Docker-specific problems.
+
+Built with ❤️ and containerized with 🐳
