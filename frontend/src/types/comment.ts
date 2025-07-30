@@ -1,4 +1,4 @@
-import type { Author, OperationResult, ApiResponse } from './blog';
+import type { Author, OperationResult } from './blog';
 
 export interface Comment {
   _id: string;
