@@ -156,7 +156,7 @@ MONGO_DB_URI=mongodb://posity-mongo:27017/posity
 **Frontend (.env):**
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000/api/v1
 ```
 
 ---
