@@ -70,7 +70,6 @@ frontend/
 
    ```env
    VITE_API_URL=http://localhost:5000/api/v1
-   VITE_APP_NAME=Posity
    ```
 
 5. **Start development server:**
