@@ -87,6 +87,9 @@ posity/
    # Node environment
    NODE_ENV=development
 
+   # when deploying use on your hosting platform
+   NODE_ENV=production
+
    # Application port
    PORT=5000
 
