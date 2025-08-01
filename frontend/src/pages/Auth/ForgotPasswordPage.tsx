@@ -30,7 +30,7 @@ const ForgotPasswordPage = () => {
     },
   });
 
-  const { forgotPassword } = useAuthStore();
+  const { forgotPassword, isLoading } = useAuthStore();
   const navigate = useNavigate();
   useAuthToast();
   usePageTitle('Forgot Password');
@@ -85,8 +85,8 @@ const ForgotPasswordPage = () => {
           />
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full">
-            Send Reset Code
+          <Button disabled={isLoading} type="submit" className="w-full">
+            {isLoading ? 'Sending code...' : 'Send Reset Code'}
           </Button>
         </form>
       </Form>

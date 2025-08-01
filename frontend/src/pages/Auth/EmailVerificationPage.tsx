@@ -32,7 +32,7 @@ const EmailVerificationPage = () => {
   const navigate = useNavigate();
   const email = location.state?.email;
 
-  const { verifyaccount, resendOtp } = useAuthStore();
+  const { verifyaccount, resendOtp, isLoading: isVerifying } = useAuthStore();
   useAuthToast();
   usePageTitle('Email Verification');
 
@@ -135,8 +135,8 @@ const EmailVerificationPage = () => {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Verify Email
+          <Button disabled={isVerifying} type="submit" className="w-full">
+            {isVerifying ? 'Verifying Email...' : 'Verify Email'}
           </Button>
         </form>
       </Form>

@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/form';
 import usePageTitle from '@/hooks/usePageTitle';
 
-// Local schema (not exported)
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z
