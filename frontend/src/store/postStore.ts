@@ -1,4 +1,3 @@
-// stores/usePostStore.ts
 import { create } from 'zustand';
 import apiInstance from '@/services/api';
 import type {

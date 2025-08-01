@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema(
       required: [true, 'Post content is required'],
       trim: true,
       minlength: 20,
-      maxlength: 1000,
+      maxlength: 5000,
     },
 
     category: {
