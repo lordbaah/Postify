@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Entering frontend directory...
+      - cd frontend
+      - echo Installing dependencies...
+      - npm ci --legacy-peer-deps
+
+  build:
+    commands:
+      - echo Building the React app...
+      - npm run build
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: frontend/dist
+  discard-paths: no
