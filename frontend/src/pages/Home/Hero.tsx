@@ -25,9 +25,8 @@ const Hero = () => {
               </Button>
             )}
           </div>
-
-          <h1>Testing Deployment on AWS Code build and S3 Hosting</h1>
-          <p>fixing cors error on s3</p>
+          {/* <h1>Testing Deployment on AWS Code build and S3 Hosting</h1>
+          <p>fixing cors error on s3</p> */}
         </div>
       </div>
     </section>
