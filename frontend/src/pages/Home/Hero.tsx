@@ -25,6 +25,8 @@ const Hero = () => {
               </Button>
             )}
           </div>
+
+          <h1>Testing Deployment on AWS Code build and S3 Hosting</h1>
         </div>
       </div>
     </section>
